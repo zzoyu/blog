@@ -24,3 +24,7 @@ pagination.pagerSize = 5
     noHl = false
     style = 'dracula'
     tabWidth = 4
+
+[caches]
+  [caches.images]
+    dir = ':cacheDir/images'
