@@ -1,0 +1,35 @@
+[latestPosts]
+    other = '최근 게시글'
+    
+[readMore]
+    other = '더보기'
+
+[summary]
+    other = '요약'
+
+[estimatedReadingTime]
+    other = 'Estimated reading time: %d minutes'
+
+[404_title]
+    other = '페이지 없음'
+
+[404_text]
+    other = "올바르지 않은 주소입니다."
+
+[search]
+    other = '검색'
+
+[search_placeholder]
+    other = '검색어를 입력하세요'
+
+[search_no_result]
+    other = '검색 결과가 없습니다'
+
+[search_result]
+    other = '검색 결과'
+
+[search_result_count]
+    other = '%d개의 결과가 있습니다'
+
+[categories]
+    other = '카테고리'

@@ -1,0 +1,50 @@
+[[main]]
+    identifier = "home"
+    name = "Home"
+    url = "/"
+    weight = 1
+
+[[main]]
+    identifier = "about"
+    name = "About me"
+    url = "https://zzoyu.github.io"
+    weight = 2
+
+[[main]]
+    identifier = "categories"
+    name = "Categories"
+    url = "/categories"
+    weight = 3
+
+[[main]]
+    identifier = "donate"
+    name = "Donate"
+    url = "https://github.com/sponsors/zzoyu"
+    weight = 4
+
+    
+# Social Media Configuration
+
+#[[social]]
+#    identifier = "twitter"
+#    name = "Twitter"
+#    url = "#"
+#    weight = 1
+
+#[[social]]
+#    identifier = "instagram"
+#    name = "Instagram"
+#    url = "#"
+#    weight = 2
+
+[[social]]
+    identifier = "github"
+    name = "GitHub"
+    url = "https://github.com/zzoyu"
+    weight = 1
+
+[[social]]
+    identifier = "linkedin"
+    name = "LinkedIn"
+    url = "http://linkedin.com/in/fe-yjcho"
+    weight = 2

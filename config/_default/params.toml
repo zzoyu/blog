@@ -1,0 +1,36 @@
+# Homepage Config
+isSinglePage = true
+
+# Meta Config
+description = "A blog about adventures in programming, technology, and life."
+keywords = ["blog", "programming", "technology", "life"]
+author = "zzoyu"
+copyright = "{year} zzoyu"
+
+# Header Configuration
+avatar = "img/2639489.jpg"
+
+#favicon
+favicon = "icons/favicon.ico"
+
+# disqus is a comment system. see https://disqus.com
+#disqusShortname = ""
+
+[emoji]
+enableEmoji = true
+
+# giscus is a comment system based on GitHub Discussions. see https://giscus.app
+[giscus]       
+    enable = true
+    repo = "zzoyu/blog"
+    repoId = "R_kgDOOey25g"
+    category = "Announcements"
+    categoryId = "DIC_kwDOOey25s4Cpa3T"
+    mapping = "pathname"  # comment value is the default value
+    strict = 0
+    reactionsEnabled = 1
+    emitMetadata = 0
+    inputPosition = "top"
+    theme = "light"
+    lang = "ko-KR"
+    lazyLoading = true
