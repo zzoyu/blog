@@ -1379,6 +1379,8 @@ nav a.active:is(.dark *) {
 
   .header .toggle-theme {
     position: relative;
+    top: 0px;
+    right: 0px;
   }
 }
 .title-large {
