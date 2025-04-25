@@ -1312,7 +1312,7 @@ nav a.active:is(.dark *) {
   flex-wrap: wrap;
   -moz-column-gap: 0.5rem;
        column-gap: 0.5rem;
-  row-gap: 1.5rem;
+  row-gap: 0px;
 }
 #content .taxonomy-list a {
   border-radius: 0.5rem;
