@@ -148,7 +148,7 @@
   hr,
   pre,
   dl {
-    @apply mb-5 text-justify;
+    @apply mb-5 text-justify leading-loose;
   }
 
   article > h1 {
@@ -203,6 +203,11 @@
 
   header h1 {
     @apply mb-0;
+  }
+
+  ul > li,
+  ol > li {
+    @apply leading-relaxed mb-4;
   }
 
   table {

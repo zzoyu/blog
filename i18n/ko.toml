@@ -2,13 +2,13 @@
     other = '최근 게시글'
     
 [readMore]
-    other = '더보기'
+    other = '읽기'
 
 [summary]
     other = '요약'
 
 [estimatedReadingTime]
-    other = 'Estimated reading time: %d minutes'
+    other = '%d 분'
 
 [404_title]
     other = '페이지 없음'

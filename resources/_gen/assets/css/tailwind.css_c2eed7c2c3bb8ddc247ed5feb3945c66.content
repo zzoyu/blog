@@ -685,6 +685,7 @@ video {
   dl {
   margin-bottom: 1.25rem;
   text-align: justify;
+  line-height: 2;
 }
 
   article > h1 {
@@ -804,6 +805,12 @@ video {
 
   header h1 {
   margin-bottom: 0px;
+}
+
+  ul > li,
+  ol > li {
+  margin-bottom: 1rem;
+  line-height: 1.625;
 }
 
   table {
