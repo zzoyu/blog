@@ -205,8 +205,8 @@
     @apply mb-0;
   }
 
-  ul > li,
-  ol > li {
+  #content ul > li,
+  #content ol > li {
     @apply leading-relaxed mb-4;
   }
 

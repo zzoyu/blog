@@ -807,8 +807,8 @@ video {
   margin-bottom: 0px;
 }
 
-  ul > li,
-  ol > li {
+  #content ul > li,
+  #content ol > li {
   margin-bottom: 1rem;
   line-height: 1.625;
 }
