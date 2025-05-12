@@ -9,8 +9,8 @@ tags:
   - 디스코드
   - webhook
 categories:
-  - environment
-layout: ""
+  - etc
+layout: "single"
 weight: 0
 ---
 
