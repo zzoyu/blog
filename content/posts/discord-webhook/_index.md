@@ -28,8 +28,8 @@ weight: 0
 제일 간단한 해결 방법은, 디스코드 웹훅 뒤에 `/github`을 붙여주는 것입니다. 그러면 깃헙에서 보내는 메시지 포맷을 디스코드가 알아서 변환해줍니다. 아래처럼 `Payload URL`을 설정합니다.
 저의 경우엔 모든 이벤트를 다 받을 생각은 없어, `Let me select individual events`를 체크하고, 몇몇 이벤트를 선택하였습니다.
 
-![alt text](image-2.png)
+![웹훅 설정](image-2.png)
 
 이제 아래처럼 채널에 메시지가 올라옵니다.
 
-![alt text](image-3.png)
+![웹훅 메시지](image-3.png)
