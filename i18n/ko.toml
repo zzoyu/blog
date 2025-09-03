@@ -5,7 +5,7 @@
     other = '읽기'
 
 [summary]
-    other = '요약'
+    other = '목차'
 
 [estimatedReadingTime]
     other = '%d 분'
