@@ -3,14 +3,15 @@ title: "[ElasticSearch] 엘라스틱서치 전반적인 팁 정리"
 draft: false
 date: 2025-09-03T02:28:43.981Z
 layout: single
-description: "엘라스틱서치를 다루며 깨달은 자잘한 것들을 정리하는 아티클입니다."
-author: "zzoyu@hotmail.com"
+description: 엘라스틱서치를 다루며 깨달은 자잘한 것들을 정리하는 아티클입니다.
+author: zzoyu@hotmail.com
 categories:
-  - "troubleshooting"
+  - troubleshooting
 tags:
-  - "엘라스틱서치"
-  - "elasticsearch"
+  - 엘라스틱서치
+  - elasticsearch
 TableOfContents: true
+keywords: []
 ---
 
 본 글의 일부 또는 전체를 다른 곳에 재게시하는 경우 출처를 명기해주시기 바랍니다.
@@ -54,7 +55,7 @@ POST /_reindex?wait_for_completion=false
 GET /_tasks/[task_id]
 ```
 
-![응답 결과](/elastic-task.png)
+![응답 결과](elastic-task.png)
 주기적으로 완료 여부를 체크합니다. 완료 시 `completed` 필드가 `true`로 변경됩니다.
 보통은 인덱스에는 추가 식별값을 넣고, `alias`를 설정하여 사용하실 텐데요. 이 때 `alias`도 롤링이 필요합니다.
 
