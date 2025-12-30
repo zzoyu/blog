@@ -30,12 +30,13 @@
     {{ with (.GetTerms "tags") }}
     <div class="pb-10 taxonomy-list tags-list">
       {{ range . }}
-      <a href="{{ .RelPermalink }}" alt="{{ .LinkTitle }}">
-        {{ .LinkTitle }}
-      </a>
+        <a href="{{ .RelPermalink }}" alt="{{ .LinkTitle }}">
+          {{ .LinkTitle }}
+        </a>
       {{ end }}
     </div>
-    {{ end }} {{ partial "single/comments/index" . }}
+    {{ end }}
+    {{ partial "single/comments/index" . }}
   </footer>
 </article>
 
