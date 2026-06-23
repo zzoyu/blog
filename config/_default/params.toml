@@ -7,6 +7,12 @@ keywords = ["blog", "programming", "technology", "life"]
 author = "zzoyu"
 copyright = "{year} zzoyu"
 
+# Verification Config (For SEO search consoles, uncomment and fill if needed)
+[verification]
+    google = "duZ_IqyMygw4eCoKWCtTdeAPRZCg0HL5U6gMRaoo4Ec"
+# naver = "your-naver-verification-code"
+
+
 # Header Configuration
 avatar = "img/2639489.jpg"
 
@@ -17,7 +23,7 @@ favicon = "icons/favicon.ico"
 #disqusShortname = ""
 
 [emoji]
-enableEmoji = true
+    enableEmoji = true
 
 # giscus is a comment system based on GitHub Discussions. see https://giscus.app
 [giscus]       
