@@ -11,7 +11,7 @@ tags:
   - 엘라스틱서치
   - elasticsearch
 TableOfContents: true
-keywords: []
+keywords: ["엘라스틱서치", "elasticsearch", "인덱스", "검색", "분석기"]
 ---
 
 {{< alert error "Disclaimer" >}}
@@ -73,6 +73,7 @@ POST /_aliases
 ```
 
 기존 별칭을 제거하고 새로운 인덱스에 대한 별칭을 추가합니다.
+실제 개발 유즈 케이스에서는 보통 인덱스에 `alias`를 지정하여 별칭으로 접근하는 경우가 많습니다. 그런데 실시간으로 빠르게 변화되거나 추가되는 데이터는 rotate를 할 때 주의해야 합니다. `alias`가 삭제된 상태에서 데이터가 인입되면 `alias`가 생성되지 못하고 새로운 인덱스가 생성되어 버리기 때문입니다. 따라서 가급적 `remove`와 `add`를 동시에 수행하는 것이 좋습니다.
 
 ## 검색 쿼리
 
