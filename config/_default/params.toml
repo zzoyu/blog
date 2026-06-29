@@ -7,17 +7,17 @@ keywords = ["blog", "programming", "technology", "life"]
 author = "zzoyu"
 copyright = "{year} zzoyu"
 
-# Verification Config (For SEO search consoles, uncomment and fill if needed)
-[verification]
-    google = "duZ_IqyMygw4eCoKWCtTdeAPRZCg0HL5U6gMRaoo4Ec"
-# naver = "your-naver-verification-code"
-
-
 # Header Configuration
 avatar = "img/2639489.jpg"
 
 #favicon
 favicon = "icons/favicon.ico"
+
+# Verification Config (For SEO search consoles, uncomment and fill if needed)
+[verification]
+    google = "duZ_IqyMygw4eCoKWCtTdeAPRZCg0HL5U6gMRaoo4Ec"
+# naver = "your-naver-verification-code"
+
 
 # disqus is a comment system. see https://disqus.com
 #disqusShortname = ""
