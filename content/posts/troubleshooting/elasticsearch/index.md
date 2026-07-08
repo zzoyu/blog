@@ -146,3 +146,12 @@ POST /_analyze
   "text": "010-1234-5678"
 }
 ```
+
+### 분석기 내 사전 교체하기
+
+`analyzer`에 지정된 txt 파일들을 변경한 뒤, reload API를 사용합니다.
+이후 상단의 `_analyze` API를 통해 변경된 사전이 적용되었는지 확인할 수 있습니다.
+
+```json
+GET /[index_name]/_reload_search_analyzers
+```
