@@ -5,11 +5,11 @@ date: 2025-01-07T09:37:00+0900
 description: 노드 버전을 쉽게 바꿔봅시다.
 layout: single
 categories:
-  - environment
+  - development
 tags:
-  - node
-  - shell
-  - 환경설정
+  - Node.js
+  - NVM
+  - Configuration
 slug: nvm
 ---
 

@@ -5,9 +5,11 @@ date: 2025-07-28T09:03:57.426Z
 preview: ""
 draft: false
 tags:
-  - HW
+  - Hardware
   - Home Automation
-categories: ["hw"]
+  - LG ThinQ
+  - API
+categories: ["making"]
 layout: single
 weight: 0
 ---

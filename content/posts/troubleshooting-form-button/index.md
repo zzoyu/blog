@@ -5,11 +5,12 @@ date: 2024-06-22T20:08:00+0900
 layout: "single"
 description: "submit 버튼이 아닌데도 submit 버튼으로 동작하는 경우"
 categories:
-  - "troubleshooting"
+  - "development"
 tags:
   - "HTML"
   - "Next.js"
-  - "form"
+  - "DOM"
+  - "Troubleshooting"
 ---
 
 `form` 내에서 `button` 태그를 사용하면 `type=submit`이 아님에도 화면이 갱신될 때가 있습니다. submit처리가 되는 것으로 추정됩니다.

@@ -6,10 +6,10 @@ preview: ""
 draft: false
 tags:
   - GitHub
-  - 디스코드
-  - webhook
+  - Discord
+  - Webhook
 categories:
-  - etc
+  - development
 layout: "single"
 weight: 0
 ---

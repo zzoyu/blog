@@ -5,12 +5,12 @@ date: 2025-12-30T22:27:00.000+0900
 layout: single
 description: 클라우드플레어를 이용해 민감한 서비스의 접근을 보호해보자.
 categories:
-  - troubleshooting
+  - development
 tags:
-  - 클라우드
-  - 환경설정
-  - 클라우드플레어
-  - 버셀
+  - Cloudflare
+  - Vercel
+  - Security
+  - Troubleshooting
 TableOfContents: false
 keywords:
   - cloudflare

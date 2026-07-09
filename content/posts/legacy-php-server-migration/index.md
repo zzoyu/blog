@@ -5,15 +5,13 @@ date: 2023-05-01T04:51:00+0900
 draft: false
 tags:
   - "PHP"
-  - "마이그레이션"
-  - "환경설정"
-  - "오라클 클라우드"
-  - "Linux"
+  - "Migration"
   - "Docker"
+  - "Oracle Cloud"
 categories:
-  - "side-project"
+  - "development"
 layout: "single"
-slug: "레거시-php-서버-이전하기"
+slug: "legacy-php-server-migration"
 ---
 
 정말 각종 자잘한 문제가 터져서 지금도 딱히 안정적이지 않지만, 기억해둘만한 일들을 메모합니다.

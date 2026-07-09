@@ -6,10 +6,11 @@ layout: single
 description: 엘라스틱서치를 다루며 깨달은 자잘한 것들을 정리하는 아티클입니다.
 author: zzoyu@hotmail.com
 categories:
-  - troubleshooting
+  - development
 tags:
-  - 엘라스틱서치
-  - elasticsearch
+  - Elasticsearch
+  - Search Engine
+  - Troubleshooting
 TableOfContents: true
 keywords: ["엘라스틱서치", "elasticsearch", "인덱스", "검색", "분석기"]
 ---

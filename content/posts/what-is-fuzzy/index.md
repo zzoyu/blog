@@ -6,12 +6,11 @@ date: 2025-04-29T01:18:53.298Z
 preview: ""
 draft: true
 tags:
-  - 알고리즘
-  - fuzzy
-  - cs
+  - Mathematics
+  - Algorithm
+  - Fuzzy
 categories:
-  - cs
-  - etc
+  - study
 layout: single
 weight: 0
 ---
