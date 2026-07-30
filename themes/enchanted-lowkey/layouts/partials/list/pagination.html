@@ -1,27 +1,36 @@
 {{ $paginator := .Paginator }}
 
-<div class="grid grid-cols-2 pb-10 font-semibold">
+<div class="flex justify-center items-center gap-2 pb-10 mt-10 font-medium">
   <!-- Previous page. -->
-  <div>
-    {{ if $paginator.HasPrev }}
-    <a href="{{ $paginator.Prev.URL }}" class="pagination-button">
-      <span class="w-4 h-4 stroke-2">
-        {{ partial "utils/icon" "arrow-left" }}
-      </span>
-      최신 글
-    </a>
+  {{ if $paginator.HasPrev }}
+  <a href="{{ $paginator.Prev.URL }}" class="pagination-button hover:border-gray-400 transition-colors" aria-label="Previous">
+    <span class="w-4 h-4 stroke-2">
+      {{ partial "utils/icon" "arrow-left" }}
+    </span>
+  </a>
+  {{ end }}
+
+  <!-- Page numbers -->
+  <div class="flex items-center gap-1 hidden sm:flex">
+    {{ range $paginator.Pagers }}
+      {{ if eq . $paginator }}
+        <span class="pagination-button font-bold text-gray-900 dark:text-white bg-gray-100 dark:bg-gray-800 border-gray-400 dark:border-gray-500 cursor-default">
+          {{ .PageNumber }}
+        </span>
+      {{ else }}
+        <a href="{{ .URL }}" class="pagination-button hover:border-gray-400 transition-colors inline-flex items-center justify-center min-w-[2rem]">
+          {{ .PageNumber }}
+        </a>
+      {{ end }}
     {{ end }}
   </div>
 
   <!-- Next page. -->
-  <div class="flex justify-end">
-    {{ if $paginator.HasNext }}
-    <a href="{{ $paginator.Next.URL }}" class="pagination-button">
-      이전 글
-      <span class="w-4 h-4 stroke-2">
-        {{ partial "utils/icon" "arrow-right" }}
-      </span>
-    </a>
-    {{ end }}
-  </div>
+  {{ if $paginator.HasNext }}
+  <a href="{{ $paginator.Next.URL }}" class="pagination-button hover:border-gray-400 transition-colors" aria-label="Next">
+    <span class="w-4 h-4 stroke-2">
+      {{ partial "utils/icon" "arrow-right" }}
+    </span>
+  </a>
+  {{ end }}
 </div>

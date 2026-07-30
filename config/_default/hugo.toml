@@ -1,6 +1,6 @@
 baseURL = 'https://zzoyu.github.io/blog/'
 copyright = "{year}" # To make 2007 - 2022. Just add before {year} example: 2007 - {year}
-languageCode = 'ko-KR'
+locale = 'ko-KR'
 defaultContentLanguage = 'ko'
 theme = 'enchanted-lowkey'
 title = 'Call me Ishmael.'

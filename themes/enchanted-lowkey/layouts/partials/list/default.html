@@ -3,26 +3,63 @@
     <a href="{{ .Permalink }}">{{ .Title }}</a>
   </h1>
 
-  <span class="date">
-    <time
-      datetime="{{ .PublishDate }}"
-      title='{{ .PublishDate.Format "Mon, Jan 2, 2006, 3:04 PM KST" }}'
-    >
-      {{ .PublishDate.Format "2006/01/02" }}
-    </time>
-  </span>
+  <div class="flex items-center gap-2">
+    {{ if not .PublishDate.IsZero }}
+    <span class="date">
+      <time
+        datetime="{{ .PublishDate }}"
+        title='{{ .PublishDate.Format "Mon, Jan 2, 2006, 3:04 PM KST" }}'
+      >
+        {{ .PublishDate.Format "2006/01/02" }}
+      </time>
+    </span>
+    {{ end }}
+
+    {{ $catName := "" }}
+    {{ if .Params.categories }}
+      {{ $rawCat := index .Params.categories 0 }}
+      {{ $catName = $rawCat | humanize | title }}
+      {{ $catPage := site.GetPage (printf "categories/%s" ($rawCat | urlize)) }}
+      {{ if $catPage }}{{ $catName = $catPage.Title }}{{ end }}
+    {{ end }}
+    
+    {{ $subcatName := "" }}
+    {{ if .File }}
+      {{ $dirParts := split (trim .File.Dir "/") "/" }}
+      {{ if ge (len $dirParts) 3 }}
+        {{ $subcatDir := index $dirParts 2 }}
+        {{ $subcatName = $subcatDir | humanize | title }}
+        {{ $section := site.GetPage .File.Dir }}
+        {{ if $section }}{{ $subcatName = $section.Title }}{{ end }}
+      {{ end }}
+    {{ end }}
+
+    {{ if or $catName $subcatName }}
+    <span class="inline-block bg-gray-100 dark:bg-zinc-800 text-gray-600 dark:text-gray-300 text-xs px-2 py-0.5 rounded-md font-medium border border-gray-200 dark:border-zinc-700">
+      {{ if $catName }}{{ $catName }}{{ end }}{{ if and $catName $subcatName }} / {{ end }}{{ if $subcatName }}{{ $subcatName }}{{ end }}
+    </span>
+    {{ end }}
+  </div>
 
   <div class="description">
-    {{ if .Params.description }} {{ .Params.description }} {{ else if .Summary
-    }} {{ .Summary }} {{ end }}
+    {{ if .Params.description }} <p>{{ .Params.description }}</p>
+    {{ else if .Summary }} {{ .Summary }} {{ end }}
   </div>
 
-  <div class="mt-2">
-    <a class="read-more" href="{{ .Permalink }}">
-      {{ i18n "readMore" }}
-      <span class="w-4 h-4 stroke-2">
-        {{ partial "utils/icon" "arrow-right" }}
-      </span>
-    </a>
-  </div>
+  {{ if and .IsNode .Pages }}
+  <ul class="flex flex-col gap-1 text-sm text-gray-600 dark:text-gray-400">
+    {{ range first 3 .Pages }}
+      <li class="flex items-center gap-2">
+        <a href="{{ .Permalink }}">{{ .Title }}</a>
+      </li>
+    {{ end }}
+  </ul>
+  {{ end }}
+
+  <a class="read-more" href="{{ .Permalink }}">
+    {{ i18n "readMore" }}
+    <span class="w-4 h-4 stroke-2">
+      {{ partial "utils/icon" "arrow-right" }}
+    </span>
+  </a>
 </article>
