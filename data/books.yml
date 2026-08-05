@@ -2,6 +2,7 @@ strang-linear-algebra:
   title: "선형대수학 입문"
   author: "길버트 스트랭 (Gilbert Strang)"
   isbn: "9781733146678"
+  category: "math"
   total_page: 568
   current_page: 0
   status: "waiting"
@@ -14,6 +15,7 @@ ebs-50-math-1:
   title: "EBS 50일 수학 (상)"
   author: "정승제"
   isbn: "9788954783583"
+  category: "math"
   total_page: 182
   current_page: 0
   status: "reading"
@@ -27,6 +29,7 @@ howto-math:
   author: "Steve Lakin"
   isbn: "9788945078537"
   isbn_en: "9780273770022"
+  category: "math"
   total_page: 223
   current_page: 0
   status: "reading"

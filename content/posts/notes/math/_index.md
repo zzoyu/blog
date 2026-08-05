@@ -10,15 +10,16 @@ categories: ["notes"]
 
 ## 📖 읽는 중
 
-{{< book id="ebs-50-math-1" >}}
-{{< book id="howto-math" >}}
+{{< book_list category="math" status="reading" >}}
 
 ---
 
 ## ✅ 완료
 
+{{< book_list category="math" status="done" >}}
+
 ---
 
 ## 📅 예정
 
-{{< book id="strang-linear-algebra" >}}
+{{< book_list category="math" status="waiting" >}}

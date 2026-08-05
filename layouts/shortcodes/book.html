@@ -114,6 +114,11 @@
       <span class="inline-flex items-center text-xs font-semibold px-2 py-0.5 rounded-full border {{ $badgeClass }} shrink-0">
         {{ $badgeText }}
       </span>
+      {{ if $book.category }}
+      <span class="inline-flex items-center text-xs font-medium px-2 py-0.5 rounded bg-gray-100 dark:bg-zinc-800 text-gray-600 dark:text-gray-400 shrink-0">
+        📁 {{ $book.category }}
+      </span>
+      {{ end }}
     </div>
 
     {{/* 저자 */}}
