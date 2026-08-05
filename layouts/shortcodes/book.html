@@ -61,34 +61,15 @@
     {{ $cardBorder = "border-green-200 dark:border-green-700" }}
   {{ end }}
 
-  {{/* ── 표지 이미지: Option C (cover_path 우선, 없으면 ISBN fetch) ── */}}
+  {{/* ── 표지 이미지 (로컬 assets 탐색) ────────────────────────── */}}
   {{ $imgSrc := "" }}
   {{ $imgAlt := printf "%s 표지" $book.title }}
 
-  {{ $coverPath := $book.cover_path | default "" }}
+  {{ $coverPath := $book.cover_path | default (printf "img/books/%s.jpg" $id) }}
   {{ if and $coverPath (ne $coverPath "placeholder") }}
-    {{/* 로컬 assets/ 기준 이미지 */}}
     {{ with resources.Get $coverPath }}
       {{ $resized := .Resize "240x webp" }}
       {{ $imgSrc = $resized.RelPermalink }}
-    {{ else }}
-      {{ warnf "book shortcode: cover_path '%s' not found in assets/ for book '%s'" $coverPath $id }}
-    {{ end }}
-  {{ end }}
-
-  {{ if and (not $imgSrc) (ne $coverPath "placeholder") }}
-    {{/* ISBN으로 Open Library에서 빌드 시점에 fetch & 캐시 */}}
-    {{ $isbn := $book.isbn | default "" }}
-    {{ if $isbn }}
-      {{ $coverURL := printf "https://covers.openlibrary.org/b/isbn/%s-M.jpg?default=false" $isbn }}
-      {{ with resources.GetRemote $coverURL }}
-        {{ with .Err }}
-          {{ warnf "book shortcode: failed to fetch cover for '%s' (isbn: %s): %s" $id $isbn . }}
-        {{ else }}
-          {{ $resized := .Resize "240x webp" }}
-          {{ $imgSrc = $resized.RelPermalink }}
-        {{ end }}
-      {{ end }}
     {{ end }}
   {{ end }}
 
