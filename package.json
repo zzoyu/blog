@@ -8,7 +8,7 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "fetch-covers": "node scripts/download-covers.mjs"
+    "fetch-covers": "bun scripts/download-covers.mjs"
   },
   "repository": {
     "type": "git",
