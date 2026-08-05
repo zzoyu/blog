@@ -48,6 +48,13 @@ jobs:
         uses: actions/configure-pages@v5
       - name: Install Node.js dependencies
         run: "[[ -f package-lock.json || -f npm-shrinkwrap.json ]] && npm ci || true"
+      - name: Restore Hugo cache (book covers & remote resources)
+        uses: actions/cache@v4
+        with:
+          path: ${{ runner.temp }}/hugo_cache
+          key: hugo-cache-${{ runner.os }}-${{ hashFiles('data/**') }}
+          restore-keys: |
+            hugo-cache-${{ runner.os }}-
       - name: Build with Hugo
         env:
           HUGO_CACHEDIR: ${{ runner.temp }}/hugo_cache
