@@ -1,15 +1,15 @@
-strang-linear-algebra:
-  title: "선형대수학 입문"
-  author: "길버트 스트랭 (Gilbert Strang)"
-  isbn: "9781733146678"
-  category: "math"
-  total_page: 568
-  current_page: 0
-  status: "waiting"
-  started_at: "2025-01-01"
-  finished_at: "2025-06-30"
-  note_url: ""
-  cover_path: "" # 로컬 이미지 경로: assets/ 기준 (예: "img/books/strang.jpg"). 비워두면 ISBN으로 자동 fetch.
+# strang-linear-algebra:
+#   title: "선형대수학 입문"
+#   author: "길버트 스트랭 (Gilbert Strang)"
+#   isbn: "9781733146678"
+#   category: "math"
+#   total_page: 568
+#   current_page: 0
+#   status: "waiting"
+#   started_at: "2025-01-01"
+#   finished_at: "2025-06-30"
+#   note_url: ""
+#   cover_path: "" # 로컬 이미지 경로: assets/ 기준 (예: "img/books/strang.jpg"). 비워두면 ISBN으로 자동 fetch.
 
 ebs-50-math-1:
   title: "EBS 50일 수학 (상)"
@@ -34,6 +34,45 @@ howto-math:
   current_page: 0
   status: "reading"
   started_at: "2026-08-01"
+  finished_at: ""
+  note_url: ""
+  cover_path: ""
+
+book-9788925575469:
+  title: "미루는 습관을 이기는 힘"
+  author: "줄리아 라베이"
+  isbn: "9788925575469"
+  category: "etc"
+  total_page: 408
+  current_page: 0
+  status: "waiting"
+  started_at: ""
+  finished_at: ""
+  note_url: ""
+  cover_path: ""
+
+book-9791196461713:
+  title: "선형대수"
+  author: "Howard Anton"
+  isbn: "9791196461713"
+  category: "math"
+  total_page: 648
+  current_page: 0
+  status: "waiting"
+  started_at: ""
+  finished_at: ""
+  note_url: ""
+  cover_path: ""
+
+introduction-to-linear-algebra:
+  title: "Introduction to Linear Algebra"
+  author: "Gilbert Strang"
+  isbn: "9781733146609"
+  category: "math"
+  total_page: 550
+  current_page: 0
+  status: "waiting"
+  started_at: ""
   finished_at: ""
   note_url: ""
   cover_path: ""
