@@ -1,0 +1,16 @@
+<!doctype html>
+<html lang="{{ .Site.LanguageCode | default `ko` }}" class="scroll-smooth dark">
+  <head>
+    {{- partial "head/index" . -}}
+  </head>
+
+  <body class="max-w-screen-md mx-auto px-2.5">
+    <div class="relative header">
+      {{ partial "header/index" . }} {{ partial "header/theme-button" . }}
+    </div>
+
+    <main id="content">{{- block "main" . -}} {{- end }}</main>
+
+    {{- partial "footer/index" . -}}
+  </body>
+</html>

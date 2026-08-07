@@ -1,0 +1,48 @@
+{{ define "main" }}
+
+<article class="flex flex-col gap-10">
+  <header class="flex flex-col gap-2">
+    <h2 class="title-large">{{ .Title }}</h2>
+
+    <div class="meta">
+      {{/* Publish date */}}
+      <time
+        datetime="{{ .PublishDate }}"
+        title='{{ .PublishDate.Format "Mon, Jan 2, 2006, 3:04 PM KST" }}'
+      >
+        {{ .PublishDate.Format "2006 Jan 2, Mon" }} • {{ printf (i18n
+        "estimatedReadingTime") .ReadingTime }}
+      </time>
+
+      {{/* Categories */}} {{ with (.GetTerms "categories") }} — {{ range . }}
+      <a class="categories" href="{{ .RelPermalink }}" alt="{{ .LinkTitle }}">
+        {{ .LinkTitle }}
+      </a>
+      {{ end }} {{ end }}
+    </div>
+  </header>
+
+  {{/* 📖 독서 포스트 도서 정보 카드 자동 렌더링 */}}
+  {{ with .Params.book }}
+    {{ partial "book-card.html" (dict "bookId" . "site" $) }}
+  {{ end }}
+
+  {{ partial "single/table-of-contents" . }}
+
+  <section>{{ .Content | emojify }}</section>
+
+  <footer class="pb-10">
+    {{ with (.GetTerms "tags") }}
+    <div class="pb-10 taxonomy-list tags-list">
+      {{ range . }}
+        <a href="{{ .RelPermalink }}" alt="{{ .LinkTitle }}">
+          {{ .LinkTitle }}
+        </a>
+      {{ end }}
+    </div>
+    {{ end }}
+    {{ partial "single/comments/index" . }}
+  </footer>
+</article>
+
+{{ end }}

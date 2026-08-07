@@ -1,0 +1,131 @@
+{{ define "main" }} 
+{{ $pages := .Pages }} 
+
+<div class="flex flex-col gap-1">
+  <h1 class="text-2xl font-extrabold">
+    {{ if .Params.header }} {{ .Params.header }} {{ else }} {{ .Title }} {{ end }}
+  </h1>
+  {{ with .Content }} {{ . }} {{ end }}
+</div>
+
+{{ $scratch := newScratch }}
+{{ $hasSubcats := false }}
+
+{{ range .Pages }}
+  {{ $subcat := "" }}
+  {{ if .File }}
+    {{ $dirParts := split (trim .File.Dir "/") "/" }}
+    {{ if ge (len $dirParts) 3 }}
+      {{ $subcat = index $dirParts 2 }}
+      {{ $hasSubcats = true }}
+    {{ end }}
+  {{ end }}
+  
+  {{ if eq $subcat "" }}
+    {{ $subcat = "Etc" }}
+  {{ end }}
+
+  {{ $scratch.Add (printf "subcat_pages_%s" $subcat) (slice .) }}
+  {{ $scratch.Add "subcats" (slice $subcat) }}
+{{ end }}
+
+{{ if $hasSubcats }}
+  {{ $uniqSubcats := uniq ($scratch.Get "subcats") }}
+  
+  {{/* Separate Etc from other subcats so we can render it at the bottom */}}
+  {{ $normalSubcats := slice }}
+  {{ $hasEtc := false }}
+  {{ range $subcat := $uniqSubcats }}
+    {{ if eq $subcat "Etc" }}
+      {{ $hasEtc = true }}
+    {{ else }}
+      {{ $normalSubcats = $normalSubcats | append $subcat }}
+    {{ end }}
+  {{ end }}
+
+  <div class="flex flex-col gap-16 mt-4 pb-10">
+    {{/* Render normal subcats */}}
+    {{ range $subcat := $normalSubcats }}
+      {{ $pages := $scratch.Get (printf "subcat_pages_%s" $subcat) }}
+      <section>
+        {{ $subcatName := $subcat }}
+        {{ $sectionPermalink := "" }}
+        {{ $firstPage := index $pages 0 }}
+        {{ $section := site.GetPage $firstPage.File.Dir }}
+        {{ if $section }}
+          {{ $subcatName = $section.Title }}
+          {{ $sectionPermalink = $section.RelPermalink }}
+        {{ else }}
+          {{ $subcatName = $subcat | humanize | title }}
+        {{ end }}
+        
+        <h2 class="text-xl font-bold mb-4 border-b pb-2 text-gray-800 dark:text-gray-200">{{ $subcatName }}</h2>
+        
+        {{/* Handle section descriptions */}}
+        {{ range $pages }}
+          {{ if .IsSection }}
+            {{ if or .Content .Summary }}
+              <div class="mb-6 prose dark:prose-invert text-gray-600 dark:text-gray-400 max-w-none text-sm">
+                {{ if .Content }}{{ .Content }}{{ else }}{{ .Summary }}{{ end }}
+              </div>
+            {{ end }}
+          {{ end }}
+        {{ end }}
+
+        {{/* Render posts */}}
+        {{ $regularPages := slice }}
+        {{ range $pages }}
+          {{ if not .IsSection }}
+            {{ $regularPages = $regularPages | append . }}
+          {{ end }}
+        {{ end }}
+
+        <div class="flex flex-col gap-6">
+          {{ $displayCount := 5 }}
+          {{ if gt (len $regularPages) $displayCount }}
+            {{ range first $displayCount $regularPages }}
+              {{ partial "list/default" . }}
+            {{ end }}
+            {{ if ne $sectionPermalink "" }}
+              <div class="mt-4 text-right">
+                <a href="{{ $sectionPermalink }}" class="inline-flex items-center text-sm font-semibold text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-200 transition-colors">
+                  더보기
+                  <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+                </a>
+              </div>
+            {{ end }}
+          {{ else }}
+            {{ range $regularPages }}
+              {{ partial "list/default" . }}
+            {{ end }}
+          {{ end }}
+        </div>
+      </section>
+    {{ end }}
+
+    {{/* Render Etc at the very bottom, showing all items */}}
+    {{ if $hasEtc }}
+      {{ $pages := $scratch.Get "subcat_pages_Etc" }}
+      <section>
+        <h2 class="text-xl font-bold mb-4 border-b pb-2 text-gray-800 dark:text-gray-200">Etc</h2>
+        <div class="flex flex-col gap-6">
+          {{ range $pages }}
+            {{ if not .IsSection }}
+              {{ partial "list/default" . }}
+            {{ end }}
+          {{ end }}
+        </div>
+      </section>
+    {{ end }}
+  </div>
+{{ else }}
+  {{ $paginator := .Paginate .Pages }}
+  <section class="flex flex-col gap-10 pb-5 mt-4">
+    {{ range $index, $pages := $paginator.Pages }} 
+      {{ partial "list/default" . }}
+    {{ end }}
+  </section>
+  {{ if gt $paginator.TotalPages 1 }} {{ partial "list/pagination" . }} {{ end }}
+{{ end }}
+
+{{ end }}

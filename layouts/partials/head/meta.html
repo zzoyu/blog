@@ -1,0 +1,110 @@
+{{ $favicon := resources.GetMatch .Site.Params.favicon }}
+
+<meta charset="UTF-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+{{/* Title */}}
+<title>{{ if .IsHome }}{{ .Site.Title }}{{ else }}{{ .Title }} | {{ .Site.Title }}{{ end }}</title>
+
+{{/* Description */}}
+{{ $description := "" }}
+{{ if .IsPage }}
+  {{ $description = or .Params.description .Summary }}
+{{ else if .IsHome }}
+  {{ $description = .Site.Params.description }}
+{{ else if .IsNode }}
+  {{ $description = or .Params.description .Summary }}
+{{ end }}
+{{ if $description }}
+<meta name="description" content="{{ $description }}" />
+{{ end }}
+
+{{/* Keywords */}}
+{{ $keywords := "" }}
+{{ if .Params.keywords }}
+  {{ if reflect.IsSlice .Params.keywords }}
+    {{ $keywords = delimit .Params.keywords ", " }}
+  {{ else }}
+    {{ $keywords = .Params.keywords }}
+  {{ end }}
+{{ else if .Site.Params.keywords }}
+  {{ if reflect.IsSlice .Site.Params.keywords }}
+    {{ $keywords = delimit .Site.Params.keywords ", " }}
+  {{ else }}
+    {{ $keywords = .Site.Params.keywords }}
+  {{ end }}
+{{ end }}
+{{ if $keywords }}
+<meta name="keywords" content="{{ $keywords }}" />
+{{ end }}
+
+{{/* Robots & Canonical */}}
+<meta name="robots" content="index, follow" />
+<link rel="canonical" href="{{ .Permalink }}" />
+<link rel="sitemap" type="application/xml" title="Sitemap" href="{{ "sitemap.xml" | absURL }}" />
+
+{{/* Open Graph / Facebook */}}
+<meta property="og:type" content="{{ if .IsPage }}article{{ else }}website{{ end }}" />
+<meta property="og:url" content="{{ .Permalink }}" />
+<meta property="og:title" content="{{ if .IsHome }}{{ .Site.Title }}{{ else }}{{ .Title }}{{ end }}" />
+{{ if $description }}
+<meta property="og:description" content="{{ $description }}" />
+{{ end }}
+{{/* Image */}}
+{{ $og_image := "" }}
+{{ if .Params.image }}
+  {{ $og_image = .Params.image | absURL }}
+{{ else if .Params.thumbnail }}
+  {{ $og_image = .Params.thumbnail | absURL }}
+{{ else if .Site.Params.avatar }}
+  {{ $og_image = .Site.Params.avatar | absURL }}
+{{ end }}
+{{ if $og_image }}
+<meta property="og:image" content="{{ $og_image }}" />
+{{ end }}
+<meta property="og:site_name" content="{{ .Site.Title }}" />
+
+{{/* Twitter Card */}}
+<meta name="twitter:card" content="summary" />
+<meta name="twitter:title" content="{{ if .IsHome }}{{ .Site.Title }}{{ else }}{{ .Title }}{{ end }}" />
+{{ if $description }}
+<meta name="twitter:description" content="{{ $description }}" />
+{{ end }}
+{{ if $og_image }}
+<meta name="twitter:image" content="{{ $og_image }}" />
+{{ end }}
+
+{{/* Custom Verification Meta Tags (e.g. Google Search Console, Naver Search Advisor) */}}
+{{ if .Site.Params.verification }}
+  {{ if .Site.Params.verification.google }}
+    <meta name="google-site-verification" content="{{ .Site.Params.verification.google }}" />
+  {{ end }}
+  {{ if .Site.Params.verification.naver }}
+    <meta name="naver-site-verification" content="{{ .Site.Params.verification.naver }}" />
+  {{ end }}
+{{ end }}
+
+{{/* Favicon */}}
+{{ if $favicon }}
+<link rel="icon" type="image/x-icon" href="{{ $favicon.RelPermalink }}" />
+{{ end }}
+
+{{/* Google Analytics */}}
+{{ if .Site.Config.Services.GoogleAnalytics.ID }}
+<!-- Google Analytics -->
+<script
+  defer
+  src="https://www.googletagmanager.com/gtag/js?id={{ .Site.Config.Services.GoogleAnalytics.ID }}"
+></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag() {
+    dataLayer.push(arguments);
+  }
+  gtag('js', new Date());
+
+  gtag('config', '{{ .Site.Config.Services.GoogleAnalytics.ID }}');
+</script>
+<!-- End Google Analytics -->
+{{ end }}
