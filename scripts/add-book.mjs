@@ -199,6 +199,61 @@ async function fetchImage(url, destPath) {
   }
 }
 
+async function addBookToNotion({ title, author, isbn, category, totalPage, coverUrl }) {
+  const key = process.env.NOTION_API_KEY;
+  const dbId = process.env.NOTION_DATABASE_ID_BOOKS;
+  if (!key || !dbId) return false;
+
+  const payload = {
+    parent: { database_id: dbId },
+    properties: {
+      title: {
+        title: [{ text: { content: title } }]
+      },
+      author: {
+        rich_text: [{ text: { content: author } }]
+      },
+      isbn: {
+        number: parseInt(isbn, 10) || null
+      },
+      category: {
+        select: { name: category }
+      },
+      total_page: {
+        number: totalPage || 0
+      },
+      current_page: {
+        number: 0
+      },
+      status: {
+        status: { name: 'waiting' }
+      }
+    }
+  };
+
+  if (coverUrl) {
+    payload.cover = {
+      type: 'external',
+      external: { url: coverUrl }
+    };
+  }
+
+  try {
+    const res = await fetch('https://api.notion.com/v1/pages', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${key}`,
+        'Notion-Version': '2022-06-28',
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(payload)
+    });
+    return res.ok;
+  } catch (e) {
+    return false;
+  }
+}
+
 async function main() {
   const query = process.argv.slice(2).join(' ');
   const rl = readline.createInterface({
@@ -364,6 +419,15 @@ async function main() {
   // 표지 이미지 URL
   const coverUrl = KB_TEMPLATE.includes('{isbn}') ? KB_TEMPLATE.replace('{isbn}', isbn) : `${KB_TEMPLATE}${isbn}`;
 
+  // Notion 도서 DB 자동 등록 시도
+  if (process.env.NOTION_API_KEY && process.env.NOTION_DATABASE_ID_BOOKS) {
+    console.log(`\n📝 Notion 도서 데이터베이스에 자동 등록 시도 중...`);
+    if (await addBookToNotion({ title, author, isbn, category, totalPage, coverUrl })) {
+      console.log(`  └─ ✅ Notion 도서 DB에 커버 이미지와 함께 성공적으로 추가되었습니다!`);
+    } else {
+      console.log(`  └─ ⚠️ Notion 도서 DB 추가를 건너뛰었습니다.`);
+    }
+  }
 
   // 표지 이미지 자동 다운로드
   const targetCover = path.join(projectRoot, 'assets', 'img', 'books', `${bookId}.jpg`);
