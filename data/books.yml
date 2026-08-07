@@ -17,13 +17,12 @@ ebs-50-math-1:
   isbn: "9788954783583"
   category: "math"
   total_page: 182
-  current_page: 0
+  current_page: 1
   status: "reading"
   started_at: "2026-08-01"
   finished_at: ""
   note_url: ""
   cover_path: ""
-
 howto-math:
   title: "How To : 어떻게 수학 공부할래?"
   author: "Steve Lakin"
