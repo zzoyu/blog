@@ -320,11 +320,16 @@ async function main() {
         if (!slug) slug = slugify(title) || `note-${page.id.replace(/-/g, '').slice(0, 8)}`;
 
         let matchedBookId = '';
+        let bookCategory = '';
+
         if (props.book && props.book.relation && props.book.relation.length > 0) {
           const relationPageId = props.book.relation[0].id;
 
           if (bookCache.has(relationPageId)) {
             matchedBookId = bookCache.get(relationPageId);
+            if (matchedBookId && localBooks[matchedBookId] && localBooks[matchedBookId].category) {
+              bookCategory = localBooks[matchedBookId].category.toLowerCase();
+            }
           } else {
             const relPage = await getPage(relationPageId);
             if (relPage && relPage.properties) {
@@ -333,25 +338,38 @@ async function main() {
               let relTitle = relProps.title && relProps.title.title && relProps.title.title.length > 0 ? relProps.title.title.map(t => t.plain_text).join('') : '';
 
               for (const [k, v] of Object.entries(localBooks)) {
-                if ((relIsbn && v.isbn === relIsbn) || (relTitle && v.title === relTitle)) {
+                if ((relIsbn && String(v.isbn) === relIsbn) || (relTitle && v.title === relTitle)) {
                   matchedBookId = k;
+                  if (v.category) bookCategory = v.category.toLowerCase();
                   break;
                 }
               }
+
               if (!matchedBookId && relTitle) {
                 matchedBookId = slugify(relTitle);
               }
+
+              if (!bookCategory && relProps.category && relProps.category.select && relProps.category.select.name) {
+                bookCategory = relProps.category.select.name.toLowerCase();
+              }
+
               bookCache.set(relationPageId, matchedBookId);
             }
           }
         }
 
-        let category = 'math';
-        if (props.tags && props.tags.multi_select && props.tags.multi_select.length > 0) {
-          category = props.tags.multi_select[0].name.toLowerCase();
+        // Tags 파싱 (Frontmatter tags 속성으로 주입)
+        const tagsList = [];
+        if (props.tags && props.tags.multi_select && Array.isArray(props.tags.multi_select)) {
+          props.tags.multi_select.forEach(t => {
+            if (t.name) tagsList.push(t.name);
+          });
         }
 
-        console.log(`  [처리 중] '${title}' (slug: ${slug})...`);
+        // URL 주소 경로에 사용할 책 카테고리 (연결 도서 카테고리 우선, 없으면 기본값 math)
+        const categoryPath = bookCategory || 'math';
+
+        console.log(`  [처리 중] '${title}' (slug: ${slug}, category: ${categoryPath}, tags: ${JSON.stringify(tagsList)})...`);
 
         const blocks = await getBlockChildren(page.id);
         const bodyMd = await blocksToMd(blocks);
@@ -360,18 +378,19 @@ async function main() {
 title: "${title.replace(/"/g, '\\"')}"
 date: ${dateStr}
 categories: ["notes"]
+${tagsList.length > 0 ? `tags: ${JSON.stringify(tagsList)}` : ''}
 ${matchedBookId ? `book: "${matchedBookId}"` : ''}
 ---
 
 ${bodyMd}
 `;
 
-        const targetDir = path.join(projectRoot, 'content', 'posts', 'notes', 'books', category);
+        const targetDir = path.join(projectRoot, 'content', 'posts', 'notes', 'books', categoryPath);
         fs.mkdirSync(targetDir, { recursive: true });
         const targetFile = path.join(targetDir, `${slug}.md`);
 
         fs.writeFileSync(targetFile, frontmatter, 'utf-8');
-        console.log(`    └─ ✅ 생성 완료: content/posts/notes/books/${category}/${slug}.md`);
+        console.log(`    └─ ✅ 생성 완료: content/posts/notes/books/${categoryPath}/${slug}.md`);
         count++;
       }
       console.log(`✨ 독서노트 총 ${count}개 동기화 완료!\n`);
