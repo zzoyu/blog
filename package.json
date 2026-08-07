@@ -1,29 +1,19 @@
 {
-  "name": "lowkey",
-  "author": "Nixentric",
-  "homepage": "https://github.com/nixentric/Lowkey-Hugo-Theme#readme",
-  "license": "MIT",
-  "version": "1.1.0",
-  "description": "A Clean and Simple Hugo theme inspired by Adam Wathan's (https://adamwathan.me/) Website.",
+  "name": "blog",
+  "author": "zzoyu",
+  "homepage": "https://github.com/zzoyu/blog",
+  "license": "",
+  "description": "블로그",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "bunx --bun hugo server -D",
     "fetch-covers": "bun scripts/download-covers.mjs",
     "add-book": "bun scripts/add-book.mjs",
     "sync-notion": "bun scripts/sync-notion-notes.mjs"
   },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/nixentric/Lowkey-Hugo-Theme.git"
-  },
   "keywords": [
-    "hugo",
-    "hugo-themes",
-    "clean-themes"
+    "hugo"
   ],
-  "bugs": {
-    "url": "https://github.com/nixentric/Lowkey-Hugo-Theme/issues"
-  },
   "browserslist": [
     "defaults"
   ],
