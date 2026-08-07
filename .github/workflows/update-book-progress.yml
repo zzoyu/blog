@@ -48,6 +48,6 @@ jobs:
           if git diff --staged --quiet; then
             echo "변경사항이 없습니다."
           else
-            git commit -m "chore(books): update progress for ${{ inputs.book_id }} to page ${{ inputs.current_page }}"
+            git commit -m "chore(book): update reading progress for ${{ inputs.book_id }}"
             git push
           fi

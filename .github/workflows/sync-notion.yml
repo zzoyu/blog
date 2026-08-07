@@ -1,0 +1,54 @@
+name: Sync Notion Notes and Books
+
+on:
+  # 1. 수동 원격 트리거 (GitHub UI, gh CLI, curl API)
+  workflow_dispatch:
+
+  # 2. 정기 자동 실행 (매일 한국시간 오전 9시 / UTC 00:00)
+  schedule:
+    - cron: '0 0 * * *'
+
+jobs:
+  sync-notion:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Install dependencies
+        run: bun install
+
+      - name: Sync Notion Notes & Books
+        env:
+          NOTION_API_KEY: ${{ secrets.NOTION_API_KEY }}
+          NOTION_DATABASE_ID_BOOK_NOTES: ${{ secrets.NOTION_DATABASE_ID_BOOK_NOTES }}
+          NOTION_DATABASE_ID_BOOKS: ${{ secrets.NOTION_DATABASE_ID_BOOKS }}
+          BOOK_API_URL_KB: ${{ secrets.BOOK_API_URL_KB }}
+          BOOK_API_URL_OL: ${{ secrets.BOOK_API_URL_OL }}
+          SEARCH_KB_AUTOCOMPLETE_URL: ${{ secrets.SEARCH_KB_AUTOCOMPLETE_URL }}
+          SEARCH_KB_DETAIL_API_URL: ${{ secrets.SEARCH_KB_DETAIL_API_URL }}
+          SEARCH_KB_PRODUCT_DETAIL_URL: ${{ secrets.SEARCH_KB_PRODUCT_DETAIL_URL }}
+          SEARCH_KB_SITE_REFERER: ${{ secrets.SEARCH_KB_SITE_REFERER }}
+        run: |
+          bun run sync-notion
+          bun run fetch-covers
+
+      - name: Commit and push synced changes
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git add content/posts/notes/ data/books.yml assets/img/books/
+          if git diff --staged --quiet; then
+            echo "💡 동기화할 새로운 노션 노트나 변경사항이 없습니다."
+          else
+            git commit -m "docs(notion): sync reading notes and books from Notion"
+            git push
+          fi
