@@ -1,36 +1,63 @@
 {{ $paginator := .Paginator }}
 
-<div class="flex justify-center items-center gap-2 pb-10 mt-10 font-medium">
-  <!-- Previous page. -->
+{{ if gt $paginator.TotalPages 1 }}
+<nav class="flex justify-center items-center gap-2 pt-10 pb-6 font-sans not-prose" aria-label="Pagination">
+  
+  {{/* 이전 페이지 버튼 (Prev) - 배경 완전 제거 */}}
   {{ if $paginator.HasPrev }}
-  <a href="{{ $paginator.Prev.URL }}" class="pagination-button hover:border-gray-400 transition-colors" aria-label="Previous">
-    <span class="w-4 h-4 stroke-2">
-      {{ partial "utils/icon" "arrow-left" }}
-    </span>
+  <a href="{{ $paginator.Prev.URL }}" 
+     class="px-2 h-9 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white text-xs font-semibold inline-flex items-center gap-1 transition-colors"
+     aria-label="Previous Page">
+    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
+    </svg>
+    <span>이전</span>
   </a>
+  {{ else }}
+  <span class="px-2 h-9 text-gray-300 dark:text-zinc-700 text-xs font-semibold inline-flex items-center gap-1 opacity-40 cursor-not-allowed select-none">
+    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
+    </svg>
+    <span>이전</span>
+  </span>
   {{ end }}
 
-  <!-- Page numbers -->
-  <div class="flex items-center gap-1 hidden sm:flex">
+  {{/* 페이지 번호 목록 */}}
+  <div class="flex items-center gap-1 mx-1">
     {{ range $paginator.Pagers }}
       {{ if eq . $paginator }}
-        <span class="pagination-button font-bold text-gray-900 dark:text-white bg-gray-100 dark:bg-gray-800 border-gray-400 dark:border-gray-500 cursor-default">
+        {{/* 현재 활성화된 페이지 (모노톤 톤앤매너) */}}
+        <span class="min-w-[2.25rem] h-9 px-3 inline-flex items-center justify-center rounded-xl bg-gray-900 text-white dark:bg-zinc-100 dark:text-zinc-950 font-extrabold text-xs cursor-default select-none transition-all shadow-xs">
           {{ .PageNumber }}
         </span>
       {{ else }}
-        <a href="{{ .URL }}" class="pagination-button hover:border-gray-400 transition-colors inline-flex items-center justify-center min-w-[2rem]">
+        {{/* 일반 선택 가능 페이지 */}}
+        <a href="{{ .URL }}" 
+           class="min-w-[2.25rem] h-9 px-3 inline-flex items-center justify-center rounded-xl text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-zinc-800/80 font-semibold text-xs transition-all duration-200">
           {{ .PageNumber }}
         </a>
       {{ end }}
     {{ end }}
   </div>
 
-  <!-- Next page. -->
+  {{/* 다음 페이지 버튼 (Next) - 배경 완전 제거 */}}
   {{ if $paginator.HasNext }}
-  <a href="{{ $paginator.Next.URL }}" class="pagination-button hover:border-gray-400 transition-colors" aria-label="Next">
-    <span class="w-4 h-4 stroke-2">
-      {{ partial "utils/icon" "arrow-right" }}
-    </span>
+  <a href="{{ $paginator.Next.URL }}" 
+     class="px-2 h-9 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white text-xs font-semibold inline-flex items-center gap-1 transition-colors"
+     aria-label="Next Page">
+    <span>다음</span>
+    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
+    </svg>
   </a>
+  {{ else }}
+  <span class="px-2 h-9 text-gray-300 dark:text-zinc-700 text-xs font-semibold inline-flex items-center gap-1 opacity-40 cursor-not-allowed select-none">
+    <span>다음</span>
+    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
+    </svg>
+  </span>
   {{ end }}
-</div>
+
+</nav>
+{{ end }}

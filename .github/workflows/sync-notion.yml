@@ -31,6 +31,7 @@ jobs:
           NOTION_API_KEY: ${{ secrets.NOTION_API_KEY }}
           NOTION_DATABASE_ID_BOOK_NOTES: ${{ secrets.NOTION_DATABASE_ID_BOOK_NOTES }}
           NOTION_DATABASE_ID_BOOKS: ${{ secrets.NOTION_DATABASE_ID_BOOKS }}
+          NOTION_DATABASE_ID_DEV_POSTS: ${{ secrets.NOTION_DATABASE_ID_DEV_POSTS }}
           BOOK_API_URL_KB: ${{ secrets.BOOK_API_URL_KB }}
           BOOK_API_URL_OL: ${{ secrets.BOOK_API_URL_OL }}
           SEARCH_KB_AUTOCOMPLETE_URL: ${{ secrets.SEARCH_KB_AUTOCOMPLETE_URL }}

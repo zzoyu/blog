@@ -3,7 +3,7 @@
     <a href="{{ .Permalink }}">{{ .Title }}</a>
   </h1>
 
-  <div class="flex items-center gap-2">
+  <div class="flex items-center flex-wrap gap-2">
     {{ if not .PublishDate.IsZero }}
     <span class="date">
       <time
@@ -39,11 +39,32 @@
       {{ if $catName }}{{ $catName }}{{ end }}{{ if and $catName $subcatName }} / {{ end }}{{ if $subcatName }}{{ $subcatName }}{{ end }}
     </span>
     {{ end }}
+
+    {{/* 카테고리 옆에 배치된 클릭 가능한 태그 목록 (더 작아진 text-[11px] 크기) */}}
+    {{ with (.GetTerms "tags") }}
+    <div class="flex flex-wrap gap-1.5 items-center">
+      {{ range . }}
+        <a href="{{ .RelPermalink }}" class="text-[11px] text-blue-600 dark:text-blue-400 font-medium hover:underline opacity-90">
+          #{{ .LinkTitle }}
+        </a>
+      {{ end }}
+    </div>
+    {{ end }}
   </div>
 
+  {{/* 순수 텍스트 일부 발췌 미리보기 구역 */}}
   <div class="description">
-    {{ if .Params.description }} <p>{{ .Params.description }}</p>
-    {{ else if .Summary }} {{ .Summary }} {{ end }}
+    {{ $summaryText := "" }}
+    {{ if .Params.description }}
+      {{ $summaryText = .Params.description | plainify }}
+    {{ else if .Summary }}
+      {{ $summaryText = .Summary | plainify }}
+    {{ else if .Content }}
+      {{ $summaryText = .Content | plainify }}
+    {{ end }}
+    {{ if $summaryText }}
+      <p>{{ $summaryText | truncate 180 }}</p>
+    {{ end }}
   </div>
 
   {{ if and .IsNode .Pages }}

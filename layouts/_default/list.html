@@ -62,7 +62,11 @@
         <div class="flex flex-col gap-6">
           {{ range $pages }}
             {{ if not .IsSection }}
-              {{ partial "list/default" . }}
+              {{ if .Params.memo }}
+                {{ partial "list/memo" . }}
+              {{ else }}
+                {{ partial "list/default" . }}
+              {{ end }}
             {{ end }}
           {{ end }}
         </div>
@@ -73,7 +77,11 @@
   {{ $paginator := .Paginate .Pages }}
   <section class="flex flex-col gap-10 pb-5 mt-4">
     {{ range $index, $pages := $paginator.Pages }} 
-      {{ partial "list/default" . }}
+      {{ if .Params.memo }}
+        {{ partial "list/memo" . }}
+      {{ else }}
+        {{ partial "list/default" . }}
+      {{ end }}
     {{ end }}
   </section>
 
