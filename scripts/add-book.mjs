@@ -1,31 +1,16 @@
+import 'dotenv/config';
 import fs from 'fs';
 import path from 'path';
 import readline from 'readline';
 import { fileURLToPath } from 'url';
+import yaml from 'js-yaml';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const projectRoot = path.resolve(__dirname, '..');
 
-// 1. .env 파일 읽기 및 환경변수 로드
-function loadEnv() {
-  const envPath = path.join(projectRoot, '.env');
-  if (fs.existsSync(envPath)) {
-    const content = fs.readFileSync(envPath, 'utf-8');
-    content.split('\n').forEach(line => {
-      const trimmed = line.trim();
-      if (trimmed && !trimmed.startsWith('#')) {
-        const [key, ...vals] = trimmed.split('=');
-        if (key && vals.length > 0 && !process.env[key.trim()]) {
-          process.env[key.trim()] = vals.join('=').trim();
-        }
-      }
-    });
-  }
-}
-loadEnv();
-
 const KB_TEMPLATE = process.env.BOOK_API_URL_KB || 'https://contents.kyobobook.co.kr/sih/fit-in/300x0/pdt/{isbn}.jpg';
+const BOOKS_YAML_PATH = path.join(projectRoot, 'data', 'books.yml');
 
 function slugify(text) {
   return text
@@ -36,11 +21,36 @@ function slugify(text) {
     .replace(/^-+|-+$/g, '');
 }
 
+function loadBooksYaml() {
+  if (!fs.existsSync(BOOKS_YAML_PATH)) return {};
+  try {
+    return yaml.load(fs.readFileSync(BOOKS_YAML_PATH, 'utf-8')) || {};
+  } catch (e) {
+    return {};
+  }
+}
+
+function saveBooksYaml(booksObject) {
+  const yamlString = yaml.dump(booksObject, {
+    indent: 2,
+    lineWidth: -1,
+    noRefs: true,
+    quotingType: '"',
+    forceQuotes: true
+  });
+  fs.writeFileSync(BOOKS_YAML_PATH, yamlString, 'utf-8');
+}
+
+// 🔍 Autocomplete 검색 API (.env 변수 활용)
 async function searchKyobo(keyword) {
-  const url = `https://search.kyobobook.co.kr/srp/api/v2/search/autocomplete/shop?keyword=${encodeURIComponent(keyword)}&gbCode=TOT&page=1&pageSize=10&deviceType=P`;
+  const template = process.env.SEARCH_KB_AUTOCOMPLETE_URL || 'https://search.kyobobook.co.kr/srp/api/v2/search/autocomplete/shop?keyword={keyword}&gbCode=TOT&page=1&pageSize=10&deviceType=P';
+  const url = template.replace('{keyword}', encodeURIComponent(keyword));
+  const referer = process.env.SEARCH_KB_SITE_REFERER || 'https://search.kyobobook.co.kr/';
+
   const res = await fetch(url, {
     headers: {
-      'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
+      'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+      'Referer': referer
     }
   });
   if (!res.ok) throw new Error(`검색 API 요청 실패 (${res.status})`);

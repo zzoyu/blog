@@ -1,3 +1,4 @@
+import 'dotenv/config';
 import fs from 'fs';
 import path from 'path';
 import crypto from 'crypto';
@@ -15,24 +16,6 @@ const INVALID_MD5_HASHES = [
 function getMd5(buffer) {
   return crypto.createHash('md5').update(buffer).digest('hex');
 }
-
-// 1. .env 파일 자동 읽기 (환경변수 세팅)
-function loadEnv() {
-  const envPath = path.join(projectRoot, '.env');
-  if (fs.existsSync(envPath)) {
-    const content = fs.readFileSync(envPath, 'utf-8');
-    content.split('\n').forEach(line => {
-      const trimmed = line.trim();
-      if (trimmed && !trimmed.startsWith('#')) {
-        const [key, ...vals] = trimmed.split('=');
-        if (key && vals.length > 0 && !process.env[key.trim()]) {
-          process.env[key.trim()] = vals.join('=').trim();
-        }
-      }
-    });
-  }
-}
-loadEnv();
 
 const KB_TEMPLATE = process.env.BOOK_API_URL_KB;
 const OL_TEMPLATE = process.env.BOOK_API_URL_OL;
