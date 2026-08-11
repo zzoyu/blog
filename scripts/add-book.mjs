@@ -142,8 +142,71 @@ async function searchKyoboDetailApi(keyword) {
   return items;
 }
 
+// 🌐 Open Library (해외/아마존 도서) 검색 API
+async function searchOpenLibrary(keyword) {
+  try {
+    const url = `https://openlibrary.org/search.json?q=${encodeURIComponent(keyword)}&limit=10`;
+    const res = await fetch(url, {
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36'
+      }
+    });
+    if (!res.ok) return [];
+    const json = await res.json();
+    const docs = json?.docs || [];
+
+    return docs.map(doc => {
+      const isbn = doc.isbn ? doc.isbn[0] : '';
+      const author = doc.author_name ? doc.author_name.join(', ') : '미상';
+      const publisher = doc.publisher ? doc.publisher[0] : '-';
+      const pageCount = doc.number_of_pages_median || doc.number_of_pages || 0;
+      const coverUrl = doc.cover_i 
+        ? `https://covers.openlibrary.org/b/id/${doc.cover_i}-L.jpg`
+        : (isbn ? `https://covers.openlibrary.org/b/isbn/${isbn}-L.jpg` : '');
+
+      return {
+        cmdt_NAME: doc.title || '',
+        chrc_NAME: author,
+        pbcm_NAME: publisher,
+        cmdtcode: isbn,
+        sale_CMDTID: '',
+        total_page: pageCount,
+        cover_url: coverUrl,
+        source: 'Open Library'
+      };
+    });
+  } catch (e) {
+    return [];
+  }
+}
+
+// ✏️ 수동 직접 입력 프로시저
+async function promptManualBook(ask, defaultKeyword = '') {
+  console.log('\n✏️ 아마존/해외 도서 정보 직접 입력 (Manual Input):');
+  const title = (await ask(`  - 책 제목 [기본값: ${defaultKeyword}]: `)).trim() || defaultKeyword;
+  const author = (await ask(`  - 저자 이름 [기본값: 미상]: `)).trim() || '미상';
+  const publisher = (await ask(`  - 출판사 [기본값: Amazon/Self]: `)).trim() || 'Amazon/Self';
+  const isbn = (await ask(`  - ISBN 또는 ASIN [선택]: `)).trim();
+  const pageInput = (await ask(`  - 총 페이지 수 [선택, 기본값: 0]: `)).trim();
+  const parsedPage = parseInt(pageInput, 10);
+  const totalPage = (!isNaN(parsedPage) && parsedPage >= 0) ? parsedPage : 0;
+  const coverUrl = (await ask(`  - 표지 이미지 URL [선택]: `)).trim();
+
+  return {
+    cmdt_NAME: title,
+    chrc_NAME: author,
+    pbcm_NAME: publisher,
+    cmdtcode: isbn,
+    sale_CMDTID: '',
+    total_page: totalPage,
+    cover_url: coverUrl,
+    source: 'Manual'
+  };
+}
+
 // 📖 상세 페이지 파싱 (.env 변수 활용)
 async function fetchTotalPage(saleCmdtId, isbn) {
+  if (!saleCmdtId && !isbn) return 0;
   const idsToTry = [saleCmdtId, isbn].filter(Boolean);
   const template = process.env.SEARCH_KB_PRODUCT_DETAIL_URL || 'https://product.kyobobook.co.kr/detail/{id}';
   const referer = process.env.SEARCH_KB_SITE_REFERER || 'https://search.kyobobook.co.kr/';
@@ -180,6 +243,7 @@ async function fetchTotalPage(saleCmdtId, isbn) {
 }
 
 async function fetchImage(url, destPath) {
+  if (!url) return false;
   const referer = process.env.SEARCH_KB_SITE_REFERER || 'https://search.kyobobook.co.kr/';
   try {
     const res = await fetch(url, {
@@ -278,21 +342,26 @@ async function main() {
   const results = await searchKyobo(keyword);
 
   if (!results.length) {
-    console.log('❌ 기본 검색 결과가 없습니다. 상세 검색 API 조회를 시도합니다...');
+    console.log('❌ 교보문고 기본 검색 결과가 없습니다.');
+  } else {
+    console.log('\n📖 교보문고 검색 결과 목록:');
+    results.forEach((item, idx) => {
+      const cleanTitle = (item.cmdt_NAME || '').replace(/<[^>]*>/g, '').trim();
+      const cleanAuthor = (item.chrc_NAME || '미상').replace(/<[^>]*>/g, '').trim();
+      const cleanPublisher = (item.pbcm_NAME || '-').replace(/<[^>]*>/g, '').trim();
+      console.log(`[${idx + 1}] ${cleanTitle} | 저자: ${cleanAuthor} | 출판사: ${cleanPublisher} | ISBN: ${item.cmdtcode}`);
+    });
   }
 
-  console.log('\n📖 검색 결과 목록:');
-  results.forEach((item, idx) => {
-    const cleanTitle = (item.cmdt_NAME || '').replace(/<[^>]*>/g, '').trim();
-    const cleanAuthor = (item.chrc_NAME || '미상').replace(/<[^>]*>/g, '').trim();
-    const cleanPublisher = (item.pbcm_NAME || '-').replace(/<[^>]*>/g, '').trim();
-    console.log(`[${idx + 1}] ${cleanTitle} | 저자: ${cleanAuthor} | 출판사: ${cleanPublisher} | ISBN: ${item.cmdtcode}`);
-  });
-
   const detailOptIdx = results.length + 1;
-  console.log(`[${detailOptIdx}] 🔍 교보문고 통합 상세 검색 결과 보기 (searchTabAsync API 사용)`);
+  const olOptIdx = results.length + 2;
+  const manualOptIdx = results.length + 3;
 
-  const answer = await ask(`\n추가할 도서 번호를 선택하세요 (1-${detailOptIdx}): `);
+  console.log(`[${detailOptIdx}] 🔍 교보문고 통합 상세 검색 결과 보기 (searchTabAsync API 사용)`);
+  console.log(`[${olOptIdx}] 🌐 Open Library (해외/아마존 도서) 검색하기`);
+  console.log(`[${manualOptIdx}] ✏️ 도서 정보 직접(수동) 입력하기 (아마존 독점/미등록 도서)`);
+
+  const answer = await ask(`\n선택할 번호를 입력하세요 (1-${manualOptIdx}): `);
   let selectedIdx = parseInt(answer, 10) - 1;
 
   let selectedBook = null;
@@ -322,6 +391,33 @@ async function main() {
     }
 
     selectedBook = detailResults[detailIdx];
+  } else if (selectedIdx === olOptIdx - 1) {
+    console.log(`\n🌐 Open Library (해외/아마존 DB)에서 '${keyword}' 검색 중...`);
+    const olResults = await searchOpenLibrary(keyword);
+
+    if (!olResults.length) {
+      console.log('❌ Open Library 검색 결과가 없습니다.');
+      rl.close();
+      return;
+    }
+
+    console.log('\n🌐 Open Library 검색 결과:');
+    olResults.forEach((item, idx) => {
+      console.log(`[${idx + 1}] ${item.cmdt_NAME} | 저자: ${item.chrc_NAME} | 출판사: ${item.pbcm_NAME} | ISBN: ${item.cmdtcode || 'N/A'}`);
+    });
+
+    const olAnswer = await ask(`\nOpen Library 결과에서 추가할 도서 번호를 선택하세요 (1-${olResults.length}): `);
+    const olIdx = parseInt(olAnswer, 10) - 1;
+
+    if (isNaN(olIdx) || olIdx < 0 || olIdx >= olResults.length) {
+      console.log('잘못된 선택입니다.');
+      rl.close();
+      return;
+    }
+
+    selectedBook = olResults[olIdx];
+  } else if (selectedIdx === manualOptIdx - 1) {
+    selectedBook = await promptManualBook(ask, keyword);
   } else if (!isNaN(selectedIdx) && selectedIdx >= 0 && selectedIdx < results.length) {
     selectedBook = results[selectedIdx];
   } else {
@@ -346,11 +442,14 @@ async function main() {
     }
   }
 
-  console.log(`\n📖 상세 정보(총 페이지 수) 조회 중...`);
-  const fetchedPage = await fetchTotalPage(saleCmdtId, isbn);
+  let fetchedPage = book.total_page || 0;
+  if (!fetchedPage && (saleCmdtId || isbn)) {
+    console.log(`\n📖 상세 정보(총 페이지 수) 조회 중...`);
+    fetchedPage = await fetchTotalPage(saleCmdtId, isbn);
+  }
 
   if (fetchedPage > 0) {
-    console.log(`  └─ ✅ 총 페이지 수 추출 성공: ${fetchedPage}쪽`);
+    console.log(`  └─ ✅ 총 페이지 수: ${fetchedPage}쪽`);
   } else {
     console.log(`  └─ ⚠️ 총 페이지 수를 자동으로 가져오지 못했습니다.`);
   }
@@ -364,7 +463,7 @@ async function main() {
   // 2. slug 설정
   let defaultSlug = existingKey || slugify(title);
   if (!defaultSlug) {
-    defaultSlug = `book-${isbn}`;
+    defaultSlug = isbn ? `book-${isbn}` : `book-${Date.now().toString().slice(-6)}`;
   }
   const customSlug = await ask(`book-id (slug)를 입력하세요 [기본값: ${defaultSlug}]: `);
   const bookId = customSlug.trim() || defaultSlug;
@@ -416,8 +515,15 @@ async function main() {
   console.log(yaml.dump({ [bookId]: booksYamlObj[bookId] }).trim());
   console.log('----------------------------------------');
 
-  // 표지 이미지 URL
-  const coverUrl = KB_TEMPLATE.includes('{isbn}') ? KB_TEMPLATE.replace('{isbn}', isbn) : `${KB_TEMPLATE}${isbn}`;
+  // 표지 이미지 URL결정
+  let coverUrl = book.cover_url || '';
+  if (!coverUrl && isbn) {
+    if (KB_TEMPLATE && KB_TEMPLATE.includes('{isbn}')) {
+      coverUrl = KB_TEMPLATE.replace('{isbn}', isbn);
+    } else if (process.env.BOOK_API_URL_OL) {
+      coverUrl = process.env.BOOK_API_URL_OL.replace('{isbn}', isbn);
+    }
+  }
 
   // Notion 도서 DB 자동 등록 시도
   if (process.env.NOTION_API_KEY && process.env.NOTION_DATABASE_ID_BOOKS) {
@@ -432,11 +538,15 @@ async function main() {
   // 표지 이미지 자동 다운로드
   const targetCover = path.join(projectRoot, 'assets', 'img', 'books', `${bookId}.jpg`);
 
-  console.log(`\n🖼️ 표지 이미지 다운로드 시도 중... (${coverUrl})`);
-  if (await fetchImage(coverUrl, targetCover)) {
-    console.log(`✅ 표지 이미지가 'assets/img/books/${bookId}.jpg' 로 저장되었습니다.`);
+  if (coverUrl) {
+    console.log(`\n🖼️ 표지 이미지 다운로드 시도 중... (${coverUrl})`);
+    if (await fetchImage(coverUrl, targetCover)) {
+      console.log(`✅ 표지 이미지가 'assets/img/books/${bookId}.jpg' 로 저장되었습니다.`);
+    } else {
+      console.log(`⚠️ 표지 이미지 자동 다운로드 실패. 필요 시 'bun run fetch-covers'를 실행해 주세요.`);
+    }
   } else {
-    console.log(`⚠️ 표지 이미지 자동 다운로드 실패. 필요 시 'bun run fetch-covers'를 실행해 주세요.`);
+    console.log(`\n⚠️ 표지 URL이 지정되지 않아 이미지를 다운로드하지 않았습니다.`);
   }
 
   rl.close();
@@ -446,3 +556,4 @@ main().catch(err => {
   console.error('오류 발생:', err);
   process.exit(1);
 });
+
