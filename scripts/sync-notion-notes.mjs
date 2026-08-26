@@ -1,43 +1,43 @@
-import 'dotenv/config';
-import fs from 'fs';
-import path from 'path';
-import { fileURLToPath } from 'url';
-import * as yaml from 'js-yaml';
+import "dotenv/config";
+import fs from "fs";
+import path from "path";
+import { fileURLToPath } from "url";
+import * as yaml from "js-yaml";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-const projectRoot = path.resolve(__dirname, '..');
+const projectRoot = path.resolve(__dirname, "..");
 
 const NOTION_API_KEY = process.env.NOTION_API_KEY;
 const NOTION_DB_NOTES = process.env.NOTION_DATABASE_ID_BOOK_NOTES;
 const NOTION_DB_BOOKS = process.env.NOTION_DATABASE_ID_BOOKS;
 const NOTION_DB_DEV_POSTS = process.env.NOTION_DATABASE_ID_DEV_POSTS;
-const BOOKS_YAML_PATH = path.join(projectRoot, 'data', 'books.yml');
+const BOOKS_YAML_PATH = path.join(projectRoot, "data", "books.yml");
 
 if (!NOTION_API_KEY) {
-  console.error('❌ NOTION_API_KEY 환경변수가 설정되지 않았습니다.');
+  console.error("❌ NOTION_API_KEY 환경변수가 설정되지 않았습니다.");
   process.exit(1);
 }
 
 const HEADERS = {
-  'Authorization': `Bearer ${NOTION_API_KEY}`,
-  'Notion-Version': '2022-06-28',
-  'Content-Type': 'application/json'
+  Authorization: `Bearer ${NOTION_API_KEY}`,
+  "Notion-Version": "2022-06-28",
+  "Content-Type": "application/json",
 };
 
 function slugify(text) {
   return text
     .toLowerCase()
     .trim()
-    .replace(/[^\w\s-]/g, '')
-    .replace(/[\s_-]+/g, '-')
-    .replace(/^-+|-+$/g, '');
+    .replace(/[^\w\s-]/g, "")
+    .replace(/[\s_-]+/g, "-")
+    .replace(/^-+|-+$/g, "");
 }
 
 function loadBooksYaml() {
   if (!fs.existsSync(BOOKS_YAML_PATH)) return {};
   try {
-    return yaml.load(fs.readFileSync(BOOKS_YAML_PATH, 'utf-8')) || {};
+    return yaml.load(fs.readFileSync(BOOKS_YAML_PATH, "utf-8")) || {};
   } catch (e) {
     return {};
   }
@@ -47,7 +47,7 @@ function loadBooksYaml() {
 function getExistingLastMod(filePath) {
   if (!fs.existsSync(filePath)) return null;
   try {
-    const content = fs.readFileSync(filePath, 'utf-8');
+    const content = fs.readFileSync(filePath, "utf-8");
     const match = content.match(/lastmod:\s*['"]?([^'\n\r"]+)['"]?/);
     return match ? match[1].trim() : null;
   } catch (e) {
@@ -56,26 +56,32 @@ function getExistingLastMod(filePath) {
 }
 
 function richTextToMd(richTextArray) {
-  if (!richTextArray || !Array.isArray(richTextArray)) return '';
-  return richTextArray.map(item => {
-    if (item.type === 'equation') {
-      const expr = (item.equation?.expression || item.plain_text || '').trim();
-      return `$${expr}$`;
-    }
+  if (!richTextArray || !Array.isArray(richTextArray)) return "";
+  return richTextArray
+    .map((item) => {
+      if (item.type === "equation") {
+        const expr = (
+          item.equation?.expression ||
+          item.plain_text ||
+          ""
+        ).trim();
+        return `$${expr}$`;
+      }
 
-    let text = item.plain_text || '';
-    if (!text) return '';
+      let text = item.plain_text || "";
+      if (!text) return "";
 
-    if (item.href) {
-      text = `[${text}](${item.href})`;
-    }
-    const annotations = item.annotations || {};
-    if (annotations.code) text = `\`${text}\``;
-    if (annotations.bold) text = `**${text}**`;
-    if (annotations.italic) text = `*${text}*`;
-    if (annotations.strikethrough) text = `~~${text}~~`;
-    return text;
-  }).join('');
+      if (item.href) {
+        text = `[${text}](${item.href})`;
+      }
+      const annotations = item.annotations || {};
+      if (annotations.code) text = `\`${text}\``;
+      if (annotations.bold) text = `**${text}**`;
+      if (annotations.italic) text = `*${text}*`;
+      if (annotations.strikethrough) text = `~~${text}~~`;
+      return text;
+    })
+    .join("");
 }
 
 async function getPage(pageId) {
@@ -113,93 +119,112 @@ async function getBlockChildren(blockId) {
 // 📖 Notion 블록 ➔ 마크다운 변환 (콜아웃 자식 블록, 수식, 임베드 등 완벽 지원)
 async function blocksToMd(blocks, indentLevel = 0) {
   const lines = [];
-  const indent = '  '.repeat(indentLevel);
+  const indent = "    ".repeat(indentLevel);
 
   for (const block of blocks) {
     const type = block.type;
     switch (type) {
-      case 'paragraph':
+      case "paragraph":
         lines.push(`${indent}${richTextToMd(block.paragraph.rich_text)}`);
-        lines.push('');
+        lines.push("");
         break;
-      case 'heading_1':
+      case "heading_1":
         lines.push(`${indent}# ${richTextToMd(block.heading_1.rich_text)}`);
-        lines.push('');
+        lines.push("");
         break;
-      case 'heading_2':
+      case "heading_2":
         lines.push(`${indent}## ${richTextToMd(block.heading_2.rich_text)}`);
-        lines.push('');
+        lines.push("");
         break;
-      case 'heading_3':
+      case "heading_3":
         lines.push(`${indent}### ${richTextToMd(block.heading_3.rich_text)}`);
-        lines.push('');
+        lines.push("");
         break;
-      case 'bulleted_list_item':
-        lines.push(`${indent}- ${richTextToMd(block.bulleted_list_item.rich_text)}`);
+      case "bulleted_list_item":
+        lines.push(
+          `${indent}- ${richTextToMd(block.bulleted_list_item.rich_text)}`,
+        );
         break;
-      case 'numbered_list_item':
-        lines.push(`${indent}1. ${richTextToMd(block.numbered_list_item.rich_text)}`);
+      case "numbered_list_item":
+        lines.push(
+          `${indent}1. ${richTextToMd(block.numbered_list_item.rich_text)}`,
+        );
         break;
-      case 'to_do':
-        const checked = block.to_do.checked ? 'x' : ' ';
-        lines.push(`${indent}- [${checked}] ${richTextToMd(block.to_do.rich_text)}`);
+      case "to_do":
+        const checked = block.to_do.checked ? "x" : " ";
+        lines.push(
+          `${indent}- [${checked}] ${richTextToMd(block.to_do.rich_text)}`,
+        );
         break;
-      case 'quote':
+      case "quote":
         lines.push(`${indent}> ${richTextToMd(block.quote.rich_text)}`);
-        lines.push('');
+        lines.push("");
         break;
-      case 'callout':
-        const iconEmoji = block.callout.icon?.type === 'emoji' ? block.callout.icon.emoji : '💡';
-        lines.push(`${indent}> ${iconEmoji} ${richTextToMd(block.callout.rich_text)}`);
-        lines.push('');
+      case "callout":
+        const iconEmoji =
+          block.callout.icon?.type === "emoji"
+            ? block.callout.icon.emoji
+            : "💡";
+        lines.push(
+          `${indent}> ${iconEmoji} ${richTextToMd(block.callout.rich_text)}`,
+        );
+        lines.push("");
         break;
-      case 'code':
-        const lang = block.code.language || '';
+      case "code":
+        const lang = block.code.language || "";
         lines.push(`${indent}\`\`\`${lang}`);
         lines.push(`${indent}${richTextToMd(block.code.rich_text)}`);
         lines.push(`${indent}\`\`\``);
-        lines.push('');
+        lines.push("");
         break;
-      case 'divider':
+      case "divider":
         lines.push(`${indent}---`);
-        lines.push('');
+        lines.push("");
         break;
-      case 'equation':
-        const eqExpr = block.equation?.expression || '';
+      case "equation":
+        const eqExpr = block.equation?.expression || "";
         lines.push(`${indent}$$\n${eqExpr}\n$$`);
-        lines.push('');
+        lines.push("");
         break;
-      case 'image':
-        const imgUrl = block.image.type === 'file' ? block.image.file?.url : block.image.external?.url;
+      case "image":
+        const imgUrl =
+          block.image.type === "file"
+            ? block.image.file?.url
+            : block.image.external?.url;
         if (imgUrl) {
           lines.push(`${indent}![image](${imgUrl})`);
-          lines.push('');
+          lines.push("");
         }
         break;
-      case 'embed':
+      case "embed":
         const embedUrl = block.embed?.url;
         if (embedUrl) {
           lines.push(`${indent}[${embedUrl}](${embedUrl})`);
-          lines.push('');
+          lines.push("");
         }
         break;
-      case 'bookmark':
+      case "bookmark":
         const bmUrl = block.bookmark?.url;
         if (bmUrl) {
           lines.push(`${indent}[${bmUrl}](${bmUrl})`);
-          lines.push('');
+          lines.push("");
         }
         break;
-      case 'video':
-        const videoUrl = block.video?.type === 'file' ? block.video.file?.url : block.video?.external?.url;
+      case "video":
+        const videoUrl =
+          block.video?.type === "file"
+            ? block.video.file?.url
+            : block.video?.external?.url;
         if (videoUrl) {
           lines.push(`${indent}[video](${videoUrl})`);
-          lines.push('');
+          lines.push("");
         }
         break;
-      case 'toggle':
-        lines.push(`${indent}<details><summary>${richTextToMd(block.toggle.rich_text)}</summary>`);
-        lines.push('');
+      case "toggle":
+        lines.push(
+          `${indent}<details><summary>${richTextToMd(block.toggle.rich_text)}</summary>`,
+        );
+        lines.push("");
         break;
       default:
         break;
@@ -209,33 +234,39 @@ async function blocksToMd(blocks, indentLevel = 0) {
     if (block.has_children) {
       const childBlocks = await getBlockChildren(block.id);
       if (childBlocks.length > 0) {
-        let childMd = await blocksToMd(childBlocks, type === 'callout' || type === 'quote' ? 0 : indentLevel + 1);
-        if (type === 'callout' || type === 'quote') {
-          childMd = childMd.split('\n').map(line => line.trim() ? `> ${line}` : '>').join('\n');
+        let childMd = await blocksToMd(
+          childBlocks,
+          type === "callout" || type === "quote" ? 0 : indentLevel + 1,
+        );
+        if (type === "callout" || type === "quote") {
+          childMd = childMd
+            .split("\n")
+            .map((line) => (line.trim() ? `> ${line}` : ">"))
+            .join("\n");
         }
         lines.push(childMd);
       }
-      if (type === 'toggle') {
+      if (type === "toggle") {
         lines.push(`${indent}</details>`);
-        lines.push('');
+        lines.push("");
       }
     }
   }
-  return lines.join('\n');
+  return lines.join("\n");
 }
 
 async function fetchNotionDB(dbId, filter) {
   const url = `https://api.notion.com/v1/databases/${dbId}/query`;
   const options = {
-    method: 'POST',
-    headers: HEADERS
+    method: "POST",
+    headers: HEADERS,
   };
   if (filter) {
     options.body = JSON.stringify({ filter });
   }
   const res = await fetch(url, options);
   if (!res.ok) {
-    const fallbackRes = await fetch(url, { method: 'POST', headers: HEADERS });
+    const fallbackRes = await fetch(url, { method: "POST", headers: HEADERS });
     if (!fallbackRes.ok) return [];
     const fbData = await fallbackRes.json();
     return fbData.results || [];
@@ -246,88 +277,102 @@ async function fetchNotionDB(dbId, filter) {
 
 async function syncBooksToNotion(localBooks) {
   if (!NOTION_DB_BOOKS) {
-    console.log('💡 NOTION_DATABASE_ID_BOOKS 환경변수가 설정되지 않아 도서 일괄 동기화를 건너뜁니다.\n');
+    console.log(
+      "💡 NOTION_DATABASE_ID_BOOKS 환경변수가 설정되지 않아 도서 일괄 동기화를 건너뜁니다.\n",
+    );
     return;
   }
 
-  console.log('📖 Notion 도서 데이터베이스 일괄 동기화 중...');
+  console.log("📖 Notion 도서 데이터베이스 일괄 동기화 중...");
 
   const notionBooks = await fetchNotionDB(NOTION_DB_BOOKS);
   const existingIsbns = new Set();
   const existingTitles = new Set();
 
-  notionBooks.forEach(page => {
+  notionBooks.forEach((page) => {
     const props = page.properties;
     if (props.isbn && props.isbn.number) {
       existingIsbns.add(String(props.isbn.number));
     }
     if (props.title && props.title.title && props.title.title.length > 0) {
-      existingTitles.add(props.title.title.map(t => t.plain_text).join('').trim());
+      existingTitles.add(
+        props.title.title
+          .map((t) => t.plain_text)
+          .join("")
+          .trim(),
+      );
     }
   });
 
   let createdCount = 0;
   for (const [bookId, bookData] of Object.entries(localBooks)) {
     const title = bookData.title;
-    const isbn = String(bookData.isbn || '');
-    const author = bookData.author || '';
-    const category = bookData.category || 'math';
-    const totalPage = parseInt(bookData.total_page || '0', 10);
-    const currentPage = parseInt(bookData.current_page || '0', 10);
-    const status = bookData.status || 'waiting';
+    const isbn = String(bookData.isbn || "");
+    const author = bookData.author || "";
+    const category = bookData.category || "math";
+    const totalPage = parseInt(bookData.total_page || "0", 10);
+    const currentPage = parseInt(bookData.current_page || "0", 10);
+    const status = bookData.status || "waiting";
     const startedAt = bookData.started_at || null;
 
-    if ((isbn && existingIsbns.has(isbn)) || (title && existingTitles.has(title))) {
+    if (
+      (isbn && existingIsbns.has(isbn)) ||
+      (title && existingTitles.has(title))
+    ) {
       continue;
     }
 
     console.log(`  [신규 등록] '${title}' (ISBN: ${isbn})...`);
 
-    const coverTemplate = process.env.BOOK_API_URL_KB || 'https://contents.kyobobook.co.kr/sih/fit-in/300x0/pdt/{isbn}.jpg';
-    const coverUrl = coverTemplate.includes('{isbn}') ? coverTemplate.replace('{isbn}', isbn) : `${coverTemplate}${isbn}`;
+    const coverTemplate =
+      process.env.BOOK_API_URL_KB ||
+      "https://contents.kyobobook.co.kr/sih/fit-in/300x0/pdt/{isbn}.jpg";
+    const coverUrl = coverTemplate.includes("{isbn}")
+      ? coverTemplate.replace("{isbn}", isbn)
+      : `${coverTemplate}${isbn}`;
 
     const payload = {
       parent: { database_id: NOTION_DB_BOOKS },
       cover: {
-        type: 'external',
-        external: { url: coverUrl }
+        type: "external",
+        external: { url: coverUrl },
       },
       properties: {
         title: {
-          title: [{ text: { content: title } }]
+          title: [{ text: { content: title } }],
         },
         author: {
-          rich_text: [{ text: { content: author } }]
+          rich_text: [{ text: { content: author } }],
         },
         isbn: {
-          number: parseInt(isbn, 10) || null
+          number: parseInt(isbn, 10) || null,
         },
         category: {
-          select: { name: category }
+          select: { name: category },
         },
         total_page: {
-          number: totalPage
+          number: totalPage,
         },
         current_page: {
-          number: currentPage
+          number: currentPage,
         },
         status: {
-          status: { name: status }
-        }
-      }
+          status: { name: status },
+        },
+      },
     };
 
     if (startedAt) {
       payload.properties.started_at = {
-        date: { start: startedAt }
+        date: { start: startedAt },
       };
     }
 
     try {
-      const res = await fetch('https://api.notion.com/v1/pages', {
-        method: 'POST',
+      const res = await fetch("https://api.notion.com/v1/pages", {
+        method: "POST",
         headers: HEADERS,
-        body: JSON.stringify(payload)
+        body: JSON.stringify(payload),
       });
       if (res.ok) {
         console.log(`    └─ ✅ Notion 도서 DB 표지 커버 포함 일괄 추가 완료!`);
@@ -340,17 +385,19 @@ async function syncBooksToNotion(localBooks) {
     }
   }
 
-  console.log(`✨ 총 ${createdCount}권의 도서가 Notion DB에 일괄 동기화되었습니다!\n`);
+  console.log(
+    `✨ 총 ${createdCount}권의 도서가 Notion DB에 일괄 동기화되었습니다!\n`,
+  );
 }
 
 async function syncDevPostsFromNotion() {
   if (!NOTION_DB_DEV_POSTS) return;
 
-  console.log('💻 Notion 개발 포스트 데이터베이스 (development) 동기화 중...');
+  console.log("💻 Notion 개발 포스트 데이터베이스 (development) 동기화 중...");
 
   const filter = {
-    property: '공개',
-    checkbox: { equals: true }
+    property: "공개",
+    checkbox: { equals: true },
   };
 
   const pages = await fetchNotionDB(NOTION_DB_DEV_POSTS, filter);
@@ -367,55 +414,83 @@ async function syncDevPostsFromNotion() {
     const props = page.properties;
     const lastEditedTime = page.last_edited_time;
 
-    let title = '';
+    let title = "";
     if (props.Issue && props.Issue.title && props.Issue.title.length > 0) {
-      title = props.Issue.title.map(t => t.plain_text).join('');
-    } else if (props.title && props.title.title && props.title.title.length > 0) {
-      title = props.title.title.map(t => t.plain_text).join('');
+      title = props.Issue.title.map((t) => t.plain_text).join("");
+    } else if (
+      props.title &&
+      props.title.title &&
+      props.title.title.length > 0
+    ) {
+      title = props.title.title.map((t) => t.plain_text).join("");
     } else if (props.Name && props.Name.title && props.Name.title.length > 0) {
-      title = props.Name.title.map(t => t.plain_text).join('');
+      title = props.Name.title.map((t) => t.plain_text).join("");
     }
     if (!title) continue;
 
     let dateStr = new Date().toISOString().slice(0, 10);
-    if (props['작성일시'] && (props['작성일시'].date || props['작성일시'].created_time)) {
-      dateStr = (props['작성일시'].date?.start || props['작성일시'].created_time).slice(0, 10);
+    if (
+      props["작성일시"] &&
+      (props["작성일시"].date || props["작성일시"].created_time)
+    ) {
+      dateStr = (
+        props["작성일시"].date?.start || props["작성일시"].created_time
+      ).slice(0, 10);
     } else if (props.date && (props.date.date || props.date.created_time)) {
-      dateStr = (props.date.date?.start || props.date.created_time).slice(0, 10);
+      dateStr = (props.date.date?.start || props.date.created_time).slice(
+        0,
+        10,
+      );
     }
 
-    let slug = '';
+    let slug = "";
     if (props.slug && props.slug.rich_text && props.slug.rich_text.length > 0) {
-      slug = props.slug.rich_text.map(t => t.plain_text).join('').trim();
+      slug = props.slug.rich_text
+        .map((t) => t.plain_text)
+        .join("")
+        .trim();
     }
-    if (!slug) slug = slugify(title) || `dev-${page.id.replace(/-/g, '').slice(0, 8)}`;
+    if (!slug)
+      slug = slugify(title) || `dev-${page.id.replace(/-/g, "").slice(0, 8)}`;
 
-    const targetDir = path.join(projectRoot, 'content', 'posts', 'development');
+    const targetDir = path.join(projectRoot, "content", "posts", "development");
     fs.mkdirSync(targetDir, { recursive: true });
     const targetFile = path.join(targetDir, `${slug}.md`);
 
     // 💡 최종 수정시간(last_edited_time) 비교 스킵 검사
     const existingLastMod = getExistingLastMod(targetFile);
     if (existingLastMod && existingLastMod === lastEditedTime) {
-      console.log(`  [스킵 ⏩] '${title}' (최종 수정일시 변경 없음: ${lastEditedTime})`);
+      console.log(
+        `  [스킵 ⏩] '${title}' (최종 수정일시 변경 없음: ${lastEditedTime})`,
+      );
       skippedCount++;
       continue;
     }
 
     const tagsList = [];
-    if (props['태그'] && props['태그'].multi_select && Array.isArray(props['태그'].multi_select)) {
-      props['태그'].multi_select.forEach(t => {
+    if (
+      props["태그"] &&
+      props["태그"].multi_select &&
+      Array.isArray(props["태그"].multi_select)
+    ) {
+      props["태그"].multi_select.forEach((t) => {
         if (t.name) tagsList.push(t.name);
       });
-    } else if (props.tags && props.tags.multi_select && Array.isArray(props.tags.multi_select)) {
-      props.tags.multi_select.forEach(t => {
+    } else if (
+      props.tags &&
+      props.tags.multi_select &&
+      Array.isArray(props.tags.multi_select)
+    ) {
+      props.tags.multi_select.forEach((t) => {
         if (t.name) tagsList.push(t.name);
       });
     }
 
-    const isMemo = props['long form']?.checkbox !== true;
+    const isMemo = props["long form"]?.checkbox !== true;
 
-    console.log(`  [동기화 🔄] '${title}' (slug: ${slug}, memo: ${isMemo}, lastmod: ${lastEditedTime})...`);
+    console.log(
+      `  [동기화 🔄] '${title}' (slug: ${slug}, memo: ${isMemo}, lastmod: ${lastEditedTime})...`,
+    );
 
     const blocks = await getBlockChildren(page.id);
     const bodyMd = await blocksToMd(blocks);
@@ -425,14 +500,14 @@ title: "${title.replace(/"/g, '\\"')}"
 date: ${dateStr}
 lastmod: ${lastEditedTime}
 categories: ["development"]
-${isMemo ? 'memo: true' : ''}
-${tagsList.length > 0 ? `tags: ${JSON.stringify(tagsList)}` : ''}
+${isMemo ? "memo: true" : ""}
+${tagsList.length > 0 ? `tags: ${JSON.stringify(tagsList)}` : ""}
 ---
 
 ${bodyMd}
 `;
 
-    fs.writeFileSync(targetFile, frontmatter, 'utf-8');
+    fs.writeFileSync(targetFile, frontmatter, "utf-8");
     console.log(`    └─ ✅ 생성 완료: content/posts/development/${slug}.md`);
     count++;
   }
@@ -441,7 +516,7 @@ ${bodyMd}
 }
 
 async function main() {
-  console.log('🚀 Notion 독서노트 & 도서 & 개발 포스트 동기화 시작...\n');
+  console.log("🚀 Notion 독서노트 & 도서 & 개발 포스트 동기화 시작...\n");
 
   const localBooks = loadBooksYaml();
 
@@ -455,13 +530,15 @@ async function main() {
 
   // 3. Notion 독서노트 DB 동기화
   if (NOTION_DB_NOTES) {
-    console.log('📚 Notion 독서노트 데이터베이스 동기화 중...');
+    console.log("📚 Notion 독서노트 데이터베이스 동기화 중...");
 
     const pages = await fetchNotionDB(NOTION_DB_NOTES);
-    const filteredPages = pages.filter(p => !p.properties.draft || p.properties.draft.checkbox === false);
+    const filteredPages = pages.filter(
+      (p) => !p.properties.draft || p.properties.draft.checkbox === false,
+    );
 
     if (!filteredPages.length) {
-      console.log('  └─ 💡 발행(draft: false) 상태인 독서노트가 없습니다.\n');
+      console.log("  └─ 💡 발행(draft: false) 상태인 독서노트가 없습니다.\n");
     } else {
       let count = 0;
       let skippedCount = 0;
@@ -470,11 +547,15 @@ async function main() {
         const props = page.properties;
         const lastEditedTime = page.last_edited_time;
 
-        let title = '';
+        let title = "";
         if (props.title && props.title.title && props.title.title.length > 0) {
-          title = props.title.title.map(t => t.plain_text).join('');
-        } else if (props.Name && props.Name.title && props.Name.title.length > 0) {
-          title = props.Name.title.map(t => t.plain_text).join('');
+          title = props.title.title.map((t) => t.plain_text).join("");
+        } else if (
+          props.Name &&
+          props.Name.title &&
+          props.Name.title.length > 0
+        ) {
+          title = props.Name.title.map((t) => t.plain_text).join("");
         }
         if (!title) continue;
 
@@ -483,32 +564,59 @@ async function main() {
           dateStr = props.date.created_time.slice(0, 10);
         }
 
-        let slug = '';
-        if (props.slug && props.slug.rich_text && props.slug.rich_text.length > 0) {
-          slug = props.slug.rich_text.map(t => t.plain_text).join('').trim();
+        let slug = "";
+        if (
+          props.slug &&
+          props.slug.rich_text &&
+          props.slug.rich_text.length > 0
+        ) {
+          slug = props.slug.rich_text
+            .map((t) => t.plain_text)
+            .join("")
+            .trim();
         }
-        if (!slug) slug = slugify(title) || `note-${page.id.replace(/-/g, '').slice(0, 8)}`;
+        if (!slug)
+          slug =
+            slugify(title) || `note-${page.id.replace(/-/g, "").slice(0, 8)}`;
 
-        let matchedBookId = '';
-        let bookCategory = '';
+        let matchedBookId = "";
+        let bookCategory = "";
 
-        if (props.book && props.book.relation && props.book.relation.length > 0) {
+        if (
+          props.book &&
+          props.book.relation &&
+          props.book.relation.length > 0
+        ) {
           const relationPageId = props.book.relation[0].id;
 
           if (bookCache.has(relationPageId)) {
             matchedBookId = bookCache.get(relationPageId);
-            if (matchedBookId && localBooks[matchedBookId] && localBooks[matchedBookId].category) {
+            if (
+              matchedBookId &&
+              localBooks[matchedBookId] &&
+              localBooks[matchedBookId].category
+            ) {
               bookCategory = localBooks[matchedBookId].category.toLowerCase();
             }
           } else {
             const relPage = await getPage(relationPageId);
             if (relPage && relPage.properties) {
               const relProps = relPage.properties;
-              let relIsbn = relProps.isbn ? String(relProps.isbn.number || '') : '';
-              let relTitle = relProps.title && relProps.title.title && relProps.title.title.length > 0 ? relProps.title.title.map(t => t.plain_text).join('') : '';
+              let relIsbn = relProps.isbn
+                ? String(relProps.isbn.number || "")
+                : "";
+              let relTitle =
+                relProps.title &&
+                relProps.title.title &&
+                relProps.title.title.length > 0
+                  ? relProps.title.title.map((t) => t.plain_text).join("")
+                  : "";
 
               for (const [k, v] of Object.entries(localBooks)) {
-                if ((relIsbn && String(v.isbn) === relIsbn) || (relTitle && v.title === relTitle)) {
+                if (
+                  (relIsbn && String(v.isbn) === relIsbn) ||
+                  (relTitle && v.title === relTitle)
+                ) {
                   matchedBookId = k;
                   if (v.category) bookCategory = v.category.toLowerCase();
                   break;
@@ -519,7 +627,12 @@ async function main() {
                 matchedBookId = slugify(relTitle);
               }
 
-              if (!bookCategory && relProps.category && relProps.category.select && relProps.category.select.name) {
+              if (
+                !bookCategory &&
+                relProps.category &&
+                relProps.category.select &&
+                relProps.category.select.name
+              ) {
                 bookCategory = relProps.category.select.name.toLowerCase();
               }
 
@@ -528,27 +641,42 @@ async function main() {
           }
         }
 
-        const categoryPath = bookCategory || 'math';
-        const targetDir = path.join(projectRoot, 'content', 'posts', 'notes', 'books', categoryPath);
+        const categoryPath = bookCategory || "math";
+        const targetDir = path.join(
+          projectRoot,
+          "content",
+          "posts",
+          "notes",
+          "books",
+          categoryPath,
+        );
         fs.mkdirSync(targetDir, { recursive: true });
         const targetFile = path.join(targetDir, `${slug}.md`);
 
         // 💡 최종 수정시간(last_edited_time) 비교 스킵 검사
         const existingLastMod = getExistingLastMod(targetFile);
         if (existingLastMod && existingLastMod === lastEditedTime) {
-          console.log(`  [스킵 ⏩] '${title}' (최종 수정일시 변경 없음: ${lastEditedTime})`);
+          console.log(
+            `  [스킵 ⏩] '${title}' (최종 수정일시 변경 없음: ${lastEditedTime})`,
+          );
           skippedCount++;
           continue;
         }
 
         const tagsList = [];
-        if (props.tags && props.tags.multi_select && Array.isArray(props.tags.multi_select)) {
-          props.tags.multi_select.forEach(t => {
+        if (
+          props.tags &&
+          props.tags.multi_select &&
+          Array.isArray(props.tags.multi_select)
+        ) {
+          props.tags.multi_select.forEach((t) => {
             if (t.name) tagsList.push(t.name);
           });
         }
 
-        console.log(`  [동기화 🔄] '${title}' (slug: ${slug}, category: ${categoryPath}, lastmod: ${lastEditedTime})...`);
+        console.log(
+          `  [동기화 🔄] '${title}' (slug: ${slug}, category: ${categoryPath}, lastmod: ${lastEditedTime})...`,
+        );
 
         const blocks = await getBlockChildren(page.id);
         const bodyMd = await blocksToMd(blocks);
@@ -558,25 +686,29 @@ title: "${title.replace(/"/g, '\\"')}"
 date: ${dateStr}
 lastmod: ${lastEditedTime}
 categories: ["notes"]
-${tagsList.length > 0 ? `tags: ${JSON.stringify(tagsList)}` : ''}
-${matchedBookId ? `book: "${matchedBookId}"` : ''}
+${tagsList.length > 0 ? `tags: ${JSON.stringify(tagsList)}` : ""}
+${matchedBookId ? `book: "${matchedBookId}"` : ""}
 ---
 
 ${bodyMd}
 `;
 
-        fs.writeFileSync(targetFile, frontmatter, 'utf-8');
-        console.log(`    └─ ✅ 생성 완료: content/posts/notes/books/${categoryPath}/${slug}.md`);
+        fs.writeFileSync(targetFile, frontmatter, "utf-8");
+        console.log(
+          `    └─ ✅ 생성 완료: content/posts/notes/books/${categoryPath}/${slug}.md`,
+        );
         count++;
       }
-      console.log(`✨ 독서노트 갱신 ${count}개, 스킵 ${skippedCount}개 완료!\n`);
+      console.log(
+        `✨ 독서노트 갱신 ${count}개, 스킵 ${skippedCount}개 완료!\n`,
+      );
     }
   }
 
-  console.log('🎉 Notion 동기화 작업이 모두 완료되었습니다!');
+  console.log("🎉 Notion 동기화 작업이 모두 완료되었습니다!");
 }
 
-main().catch(err => {
-  console.error('❌ 오류 발생:', err);
+main().catch((err) => {
+  console.error("❌ 오류 발생:", err);
   process.exit(1);
 });
