@@ -5,6 +5,7 @@ lastmod: 2026-08-07T13:06:00.000Z
 categories: ["development"]
 memo: true
 tags: ["Android","iOS"]
+reference: "https://codechacha.com/ko/android-cleartext-http-traffic-issue/"
 ---
 
 > Cleartext HTTP traffic to [www.xxxxxx.com](http://www.xxxxxx.com/) not permitted

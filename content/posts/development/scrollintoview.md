@@ -5,6 +5,7 @@ lastmod: 2026-08-07T12:53:00.000Z
 categories: ["development"]
 memo: true
 tags: ["HTML5/CSS","프론트엔드"]
+reference: "https://stackoverflow.com/questions/13614112/using-scrollintoview-with-a-fixed-position-header"
 ---
 
 헤더 크기 만큼 상단에 마진을 줄 수 있다.

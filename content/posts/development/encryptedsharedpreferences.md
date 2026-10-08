@@ -3,7 +3,6 @@ title: "EncryptedSharedPreferences"
 date: 2021-10-14
 lastmod: 2026-08-07T13:09:00.000Z
 categories: ["development"]
-
 tags: ["Android","Kotlin"]
 ---
 
@@ -14,26 +13,26 @@ tags: ["Android","Kotlin"]
 ### 절차
 
 1. dependencies 추가
-  `implementation 'androidx.security:security-crypto-ktx:1.1.0-alpha03'`
+    `implementation 'androidx.security:security-crypto-ktx:1.1.0-alpha03'`
 
 1. put
-  ```kotlin
-  var masterKey:MasterKey = MasterKey.Builder(applicationContext, MasterKey.DEFAULT_MASTER_KEY_ALIAS)
+    ```kotlin
+    var masterKey:MasterKey = MasterKey.Builder(applicationContext, MasterKey.DEFAULT_MASTER_KEY_ALIAS)
 																.setKeyScheme(MasterKey.KeyScheme.AES256_GCM)
 																.build()
 var sharedPreferences = EncryptedSharedPreferences.create(applicationContext, "filename", masterKey, EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV, EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM)
 sharedPreferences.edit()
 			.putString("name", "value")
 			.commit()
-  ```
+    ```
 
 1. get
-  ```kotlin
-  var masterKey = MasterKey.Builder(applicationContext, MasterKey.DEFAULT_MASTER_KEY_ALIAS)
+    ```kotlin
+    var masterKey = MasterKey.Builder(applicationContext, MasterKey.DEFAULT_MASTER_KEY_ALIAS)
 										.setKeyScheme(MasterKey.KeyScheme.AES256_GCM)
 										.build()
 var sharedPreferences = EncryptedSharedPreferences
 												.create(applicationContext, "filename", masterKey, EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV, EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM)
 sharedPreferences.getString("name", "default")
-  ```
+    ```
 
