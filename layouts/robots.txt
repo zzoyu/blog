@@ -2,4 +2,4 @@ User-agent: *
 Allow: /
 Disallow:
 
-Sitemap: {{ "sitemap.xml" | absURL }}
+Sitemap: {{ "sitemap_index.xml" | absURL }}

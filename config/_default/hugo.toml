@@ -39,3 +39,5 @@ hasCJKLanguage = true
 
   [security.funcs]
     getenv = ['^BOOK_API_URL', '^HUGO_', '^CI$']
+[sitemap]
+  filename = "sitemap_index.xml"
