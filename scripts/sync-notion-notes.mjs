@@ -19,6 +19,8 @@ if (!NOTION_API_KEY) {
   process.exit(1);
 }
 
+const FORCE_SYNC = process.argv.includes("--force");
+
 const HEADERS = {
   Authorization: `Bearer ${NOTION_API_KEY}`,
   "Notion-Version": "2022-06-28",
@@ -187,12 +189,46 @@ async function blocksToMd(blocks, indentLevel = 0) {
         lines.push("");
         break;
       case "image":
-        const imgUrl =
+        let imgUrl =
           block.image.type === "file"
             ? block.image.file?.url
             : block.image.external?.url;
         if (imgUrl) {
-          lines.push(`${indent}![image](${imgUrl})`);
+          try {
+            let ext = "png";
+            try {
+              const pathname = new URL(imgUrl).pathname;
+              const matches = pathname.match(/\.([a-zA-Z0-9]+)$/);
+              if (matches) ext = matches[1];
+            } catch (e) {}
+
+            const filename = `${block.id}.${ext}`;
+            const localDir = path.join(projectRoot, "static", "img", "notion");
+            const localPath = path.join(localDir, filename);
+
+            if (!fs.existsSync(localDir)) {
+              fs.mkdirSync(localDir, { recursive: true });
+            }
+
+            if (FORCE_SYNC || !fs.existsSync(localPath)) {
+              const res = await fetch(imgUrl);
+              if (res.ok) {
+                const buffer = await res.arrayBuffer();
+                fs.writeFileSync(localPath, Buffer.from(buffer));
+              } else {
+                console.error(`    └─ ❌ 이미지 다운로드 실패: HTTP ${res.status}`);
+              }
+            }
+            imgUrl = `/img/notion/${filename}`;
+          } catch (e) {
+            console.error("    └─ ❌ 이미지 처리 오류:", e);
+          }
+
+          const captionText = block.image.caption && block.image.caption.length > 0 
+            ? block.image.caption.map(c => c.plain_text).join("") 
+            : "image";
+
+          lines.push(`${indent}![${captionText}](${imgUrl})`);
           lines.push("");
         }
         break;
@@ -459,7 +495,7 @@ async function syncDevPostsFromNotion() {
 
     // 💡 최종 수정시간(last_edited_time) 비교 스킵 검사
     const existingLastMod = getExistingLastMod(targetFile);
-    if (existingLastMod && existingLastMod === lastEditedTime) {
+    if (!FORCE_SYNC && existingLastMod && existingLastMod === lastEditedTime) {
       console.log(
         `  [스킵 ⏩] '${title}' (최종 수정일시 변경 없음: ${lastEditedTime})`,
       );
@@ -488,6 +524,15 @@ async function syncDevPostsFromNotion() {
 
     const isMemo = props["long form"]?.checkbox !== true;
 
+    let referenceUrl = "";
+    if (props["출처"]) {
+      if (props["출처"].url) {
+        referenceUrl = props["출처"].url;
+      } else if (props["출처"].rich_text && props["출처"].rich_text.length > 0) {
+        referenceUrl = props["출처"].rich_text.map(t => t.plain_text).join("").trim();
+      }
+    }
+
     console.log(
       `  [동기화 🔄] '${title}' (slug: ${slug}, memo: ${isMemo}, lastmod: ${lastEditedTime})...`,
     );
@@ -495,19 +540,19 @@ async function syncDevPostsFromNotion() {
     const blocks = await getBlockChildren(page.id);
     const bodyMd = await blocksToMd(blocks);
 
-    const frontmatter = `---
-title: "${title.replace(/"/g, '\\"')}"
-date: ${dateStr}
-lastmod: ${lastEditedTime}
-categories: ["development"]
-${isMemo ? "memo: true" : ""}
-${tagsList.length > 0 ? `tags: ${JSON.stringify(tagsList)}` : ""}
----
+    const frontmatterLines = [
+      "---",
+      `title: "${title.replace(/"/g, '\\"')}"`,
+      `date: ${dateStr}`,
+      `lastmod: ${lastEditedTime}`,
+      `categories: ["development"]`
+    ];
+    if (isMemo) frontmatterLines.push(`memo: true`);
+    if (tagsList.length > 0) frontmatterLines.push(`tags: ${JSON.stringify(tagsList)}`);
+    if (referenceUrl) frontmatterLines.push(`reference: "${referenceUrl.replace(/"/g, '\\"')}"`);
+    frontmatterLines.push("---", "", bodyMd, "");
 
-${bodyMd}
-`;
-
-    fs.writeFileSync(targetFile, frontmatter, "utf-8");
+    fs.writeFileSync(targetFile, frontmatterLines.join("\n"), "utf-8");
     console.log(`    └─ ✅ 생성 완료: content/posts/development/${slug}.md`);
     count++;
   }
@@ -517,6 +562,9 @@ ${bodyMd}
 
 async function main() {
   console.log("🚀 Notion 독서노트 & 도서 & 개발 포스트 동기화 시작...\n");
+  if (FORCE_SYNC) {
+    console.log("⚠️ 강제 동기화(--force) 옵션이 켜져 있습니다. 날짜 비교를 무시하고 모든 포스트를 갱신합니다.\n");
+  }
 
   const localBooks = loadBooksYaml();
 
@@ -655,7 +703,7 @@ async function main() {
 
         // 💡 최종 수정시간(last_edited_time) 비교 스킵 검사
         const existingLastMod = getExistingLastMod(targetFile);
-        if (existingLastMod && existingLastMod === lastEditedTime) {
+        if (!FORCE_SYNC && existingLastMod && existingLastMod === lastEditedTime) {
           console.log(
             `  [스킵 ⏩] '${title}' (최종 수정일시 변경 없음: ${lastEditedTime})`,
           );
@@ -678,22 +726,31 @@ async function main() {
           `  [동기화 🔄] '${title}' (slug: ${slug}, category: ${categoryPath}, lastmod: ${lastEditedTime})...`,
         );
 
+        let referenceUrl = "";
+        if (props["출처"]) {
+          if (props["출처"].url) {
+            referenceUrl = props["출처"].url;
+          } else if (props["출처"].rich_text && props["출처"].rich_text.length > 0) {
+            referenceUrl = props["출처"].rich_text.map(t => t.plain_text).join("").trim();
+          }
+        }
+
         const blocks = await getBlockChildren(page.id);
         const bodyMd = await blocksToMd(blocks);
 
-        const frontmatter = `---
-title: "${title.replace(/"/g, '\\"')}"
-date: ${dateStr}
-lastmod: ${lastEditedTime}
-categories: ["notes"]
-${tagsList.length > 0 ? `tags: ${JSON.stringify(tagsList)}` : ""}
-${matchedBookId ? `book: "${matchedBookId}"` : ""}
----
+        const frontmatterLines = [
+          "---",
+          `title: "${title.replace(/"/g, '\\"')}"`,
+          `date: ${dateStr}`,
+          `lastmod: ${lastEditedTime}`,
+          `categories: ["notes"]`
+        ];
+        if (tagsList.length > 0) frontmatterLines.push(`tags: ${JSON.stringify(tagsList)}`);
+        if (matchedBookId) frontmatterLines.push(`book: "${matchedBookId}"`);
+        if (referenceUrl) frontmatterLines.push(`reference: "${referenceUrl.replace(/"/g, '\\"')}"`);
+        frontmatterLines.push("---", "", bodyMd, "");
 
-${bodyMd}
-`;
-
-        fs.writeFileSync(targetFile, frontmatter, "utf-8");
+        fs.writeFileSync(targetFile, frontmatterLines.join("\n"), "utf-8");
         console.log(
           `    └─ ✅ 생성 완료: content/posts/notes/books/${categoryPath}/${slug}.md`,
         );
