@@ -46,7 +46,7 @@ jobs:
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
-          git add content/posts/notes/ data/books.yml assets/img/books/
+          git add content/ data/books.yml assets/img/books/
           if git diff --staged --quiet; then
             echo "💡 동기화할 새로운 노션 노트나 변경사항이 없습니다."
           else
