@@ -1,12 +1,12 @@
 ---
 title: "특이한 개발용 파일과 명령"
 date: 2026-11-17
-lastmod: 2026-11-18T00:31:00.000Z
+lastmod: 2026-11-18T23:30:00.000Z
 categories: ["development"]
 tags: ["Linux","Mac"]
 ---
 
-## /dev/null
+### /dev/null
 
 쓰는 건 전부 사라지고, 읽으면 바로 끝. 유닉스에 원래 있는 특수 파일.
 
